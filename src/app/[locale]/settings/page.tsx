@@ -16,8 +16,8 @@ import {
   MessageSquare,
   Star,
   Info,
-  LogOut,
 } from 'lucide-react';
+import { SettingsLogoutButton } from '@/components/settings/SettingsLogoutButton';
 
 export default function SettingsPage({ params: { locale } }: { params: { locale: string } }) {
   const t = useTranslations('Settings');
@@ -167,10 +167,7 @@ export default function SettingsPage({ params: { locale } }: { params: { locale:
         </div>
 
         {/* Log Out Button */}
-        <button className="w-full bg-white rounded-xl shadow-sm border border-red-100 p-4 flex items-center justify-center gap-2 hover:bg-red-50 transition-colors text-red-500 group">
-          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-bold text-sm">{t('logout')}</span>
-        </button>
+        <SettingsLogoutButton label={t('logout')} locale={locale} />
       </div>
     </div>
   );
