@@ -21,13 +21,16 @@ export default async function SummaryPage({
   const attemptId = searchParams.attemptId;
   let summary = null;
 
+  const baseUrl = process.env.NEXTAUTH_URL
+    ? process.env.NEXTAUTH_URL
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
+
   if (attemptId) {
-    const res = await fetch(
-      `http://localhost:${process.env.PORT || 3000}/api/attempt/${attemptId}`,
-      {
-        cache: 'no-store',
-      }
-    );
+    const res = await fetch(`${baseUrl}/api/attempt/${attemptId}`, {
+      cache: 'no-store',
+    });
     if (res.ok) {
       const data = await res.json();
       summary = data.data;

@@ -1,8 +1,15 @@
 import { notFound } from 'next/navigation';
 import { QuizRunner } from '@/components/quiz/QuizRunner';
 
+const getBaseUrl = () => {
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return 'http://localhost:3000';
+};
+
 async function startQuizAttempt(quizId: string) {
-  const res = await fetch(`http://localhost:${process.env.PORT || 3000}/api/attempt`, {
+  const baseUrl = getBaseUrl();
+  const res = await fetch(`${baseUrl}/api/attempt`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ quizId }),
@@ -16,12 +23,10 @@ async function startQuizAttempt(quizId: string) {
 
 export default async function EmbedQuizPage({ params }: { params: { quizSlug: string } }) {
   // Fetch quiz metadata and questions
-  const quizRes = await fetch(
-    `http://localhost:${process.env.PORT || 3000}/api/quiz/${params.quizSlug}`,
-    {
-      cache: 'no-store',
-    }
-  );
+  const baseUrl = getBaseUrl();
+  const quizRes = await fetch(`${baseUrl}/api/quiz/${params.quizSlug}`, {
+    cache: 'no-store',
+  });
 
   if (!quizRes.ok) {
     notFound();
