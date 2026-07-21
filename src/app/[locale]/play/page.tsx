@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
-import { Zap, Clock, HelpCircle, Gift, Brain } from 'lucide-react';
+import { Zap, Clock, HelpCircle, Gift, Brain, Bot } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function PlayPage({ params: { locale } }: { params: { locale: string } }) {
@@ -88,7 +88,10 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
                 <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-4">
                   {tCards('level', { num: 2 })}
                 </div>
-                <div className="text-5xl self-center mb-4 mt-2 opacity-90 drop-shadow-sm">🤖</div>
+                <Bot
+                  className="w-12 h-12 self-center mb-4 mt-2 text-white/90 drop-shadow-sm"
+                  strokeWidth={1.5}
+                />
                 <h4 className="font-bold text-sm leading-tight mt-auto mb-3">
                   {tCards('mlFundamentals')}
                 </h4>
