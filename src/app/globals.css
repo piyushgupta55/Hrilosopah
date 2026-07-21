@@ -3,21 +3,177 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-bg: #ffffff;
+  --color-surface: #fafafa;
+  --color-border: #eaeaea;
+
+  --color-text-primary: #111111;
+  --color-text-secondary: #666666;
+  --color-text-on-topic: #ffffff;
+
+  --color-primary: #0066ff;
+  --color-accent: #00c853;
+  --color-silver: #c0c0c0;
+  --color-light-grey: #f5f5f5;
+  --color-dark-grey: #333333;
+
+  --color-topic-ai: #111111;
+  --color-topic-crypto: #0066ff;
+
+  --color-cta: #111111;
+  --color-cta-hover: #333333;
+  --color-score: #ffc93c;
+  --color-success: #2fbf71;
+  --color-error: #f5484b;
+  --color-locked: #94a3b8;
+  --color-payment-primary: #0066ff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html.dark {
+  --color-bg: #0b0d12;
+  --color-surface: #121722;
+  --color-border: rgba(255, 255, 255, 0.06);
+
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #c8d1e1;
+  --color-text-on-topic: #ffffff;
+
+  --color-primary: #4f7dff;
+  --color-accent: #8b5cf6;
+  --color-silver: #4e5565;
+  --color-light-grey: #181e2b;
+  --color-dark-grey: #c8d1e1;
+
+  --color-topic-ai: #ffffff;
+  --color-topic-crypto: #4f7dff;
+
+  --color-cta: #4f7dff;
+  --color-cta-hover: #8b5cf6;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+}
+
+/* Dark Mode Overrides for Hardcoded Light Tailwind Classes */
+html.dark .bg-white {
+  background-color: #121722 !important; /* Primary Surface */
+}
+html.dark .bg-white\/95 {
+  background-color: rgba(18, 23, 34, 0.95) !important;
+}
+html.dark .bg-white\/80 {
+  background-color: rgba(18, 23, 34, 0.8) !important;
+}
+html.dark .bg-\[\#F8F9FA\],
+html.dark .bg-gray-50 {
+  background-color: #0b0d12 !important; /* App Background */
+}
+html.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+html.dark .text-gray-700,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #c8d1e1 !important;
+}
+html.dark .text-gray-600 {
+  color: #8b93a7 !important;
+}
+html.dark .border-gray-50,
+html.dark .border-gray-100,
+html.dark .border-gray-200 {
+  border-color: rgba(255, 255, 255, 0.06) !important;
+}
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #181e2b !important; /* Secondary Surface */
+  color: #ffffff !important;
+  border-color: rgba(255, 255, 255, 0.06) !important;
+  border-radius: 16px !important;
+}
+
+/* Dark Mode Hover Overrides */
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-gray-100:hover,
+html.dark .hover\:bg-red-50:hover {
+  background-color: #2c3648 !important; /* Hover */
+}
+html.dark .hover\:text-gray-600:hover {
+  color: #ffffff !important;
+}
+
+/* Premium Border Radius Overrides */
+html.dark .rounded-xl,
+html.dark .rounded-2xl {
+  border-radius: 22px !important; /* Cards */
+}
+html.dark button:not(.rounded-full):not(.w-5):not(.w-9):not(.w-10),
+html.dark .py-3.5 {
+  border-radius: 18px !important; /* Buttons */
+}
+html.dark .rounded-lg {
+  border-radius: 16px !important; /* Inputs / Inner components */
+}
+
+/* Card and category color overrides for dark mode */
+html.dark .bg-\[\#F3E8FF\] {
+  background-color: rgba(139, 92, 246, 0.12) !important;
+}
+html.dark .bg-\[\#E0F2FE\] {
+  background-color: rgba(79, 125, 255, 0.12) !important;
+}
+html.dark .bg-\[\#E0E7FF\] {
+  background-color: rgba(79, 125, 255, 0.15) !important;
+}
+html.dark .bg-\[\#D1FAE5\] {
+  background-color: rgba(34, 197, 94, 0.12) !important;
+}
+html.dark .bg-\[\#EAF2FF\] {
+  background-color: rgba(79, 125, 255, 0.12) !important;
+}
+html.dark .bg-\[\#7B61FF\] {
+  background-color: rgba(139, 92, 246, 0.25) !important;
+}
+html.dark .bg-gray-50 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+html.dark .text-blue-600 {
+  color: #4f7dff !important;
+}
+html.dark .text-purple-600 {
+  color: #8b5cf6 !important;
+}
+html.dark .text-indigo-600 {
+  color: #4f7dff !important;
+}
+html.dark .text-emerald-600 {
+  color: #22c55e !important;
+}
+html.dark .text-\[\#E0D4FF\] {
+  color: #c8d1e1 !important;
+}
+html.dark .fill-blue-600\/20 {
+  fill: rgba(79, 125, 255, 0.15) !important;
+}
+html.dark .stroke-blue-600 {
+  stroke: #4f7dff !important;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-bg);
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera globally */
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox globally */
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 @layer utilities {

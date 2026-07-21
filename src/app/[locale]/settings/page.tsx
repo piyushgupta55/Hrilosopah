@@ -1,0 +1,177 @@
+import React from 'react';
+import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import {
+  ChevronLeft,
+  ChevronRight,
+  User,
+  Mail,
+  Bell,
+  Shield,
+  Moon,
+  Globe,
+  Sliders,
+  Database,
+  HelpCircle,
+  MessageSquare,
+  Star,
+  Info,
+  LogOut,
+} from 'lucide-react';
+
+export default function SettingsPage({ params: { locale } }: { params: { locale: string } }) {
+  const t = useTranslations('Settings');
+
+  return (
+    <div className="flex-1 w-full bg-[#F8F9FA] flex flex-col overflow-y-auto overflow-x-hidden relative">
+      {/* Header */}
+      <div className="px-5 w-full flex items-center justify-between py-2 bg-white sticky top-0 z-10 border-b border-gray-100 shadow-sm">
+        <Link
+          href={`/${locale}/profile`}
+          className="w-10 h-10 -ml-2 rounded-full flex items-center justify-center text-gray-900 hover:bg-gray-100 transition-colors"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </Link>
+        <h1 className="text-xl font-bold text-gray-900 tracking-tight">{t('title')}</h1>
+        <div className="w-10 h-10"></div> {/* Placeholder to balance header */}
+      </div>
+
+      <div className="p-5 flex flex-col gap-8 pb-12">
+        {/* Account Section */}
+        <div className="w-full">
+          <h3 className="font-bold text-gray-900 text-sm mb-3 px-1">{t('account')}</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <Link
+              href={`/${locale}/settings/personal-info`}
+              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <User className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('personalInfo')}</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
+            <Link
+              href={`/${locale}/settings/email-password`}
+              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('emailPassword')}</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
+            <Link
+              href={`/${locale}/settings/privacy`}
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Shield className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('privacy')}</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Preferences Section */}
+        <div className="w-full">
+          <h3 className="font-bold text-gray-900 text-sm mb-3 px-1">{t('preferences')}</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <Link
+              href={`/${locale}/settings/appearance`}
+              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Moon className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('appearance')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">{t('lightMode')}</span>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </div>
+            </Link>
+            <Link
+              href={`/${locale}/settings/language`}
+              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Globe className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('language')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">
+                  {(() => {
+                    const languageNames: Record<string, string> = {
+                      en: 'English',
+                      ru: 'Русский',
+                      hi: 'हिंदी',
+                      pl: 'Polski',
+                      lt: 'Lietuvių',
+                      es: 'Español',
+                      fr: 'Français',
+                      it: 'Italiano',
+                      ro: 'Română',
+                      he: 'עברית',
+                      zh: '中文',
+                      ar: 'العربية',
+                      ur: 'اردו',
+                    };
+                    return languageNames[locale] || 'English';
+                  })()}
+                </span>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </div>
+            </Link>
+            <Link
+              href={`/${locale}/settings/difficulty`}
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <Sliders className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('difficulty')}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-500 font-medium">{t('beginner')}</span>
+                <ChevronRight className="w-5 h-5 text-gray-400" />
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* Support Section */}
+        <div className="w-full">
+          <h3 className="font-bold text-gray-900 text-sm mb-3 px-1">{t('support')}</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+            <Link
+              href={`/${locale}/settings/help`}
+              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <HelpCircle className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('helpCenter')}</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
+            <Link
+              href={`/${locale}/settings/contact`}
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-gray-500" />
+                <span className="font-semibold text-sm text-gray-900">{t('contactUs')}</span>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
+          </div>
+        </div>
+
+        {/* Log Out Button */}
+        <button className="w-full bg-white rounded-xl shadow-sm border border-red-100 p-4 flex items-center justify-center gap-2 hover:bg-red-50 transition-colors text-red-500 group">
+          <LogOut className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          <span className="font-bold text-sm">{t('logout')}</span>
+        </button>
+      </div>
+    </div>
+  );
+}

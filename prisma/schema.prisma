@@ -1,0 +1,140 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Quiz {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  category     String
+  isActive     Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  attempts     Attempt[]
+  questions    Question[]
+  translations QuizTranslation[]
+}
+
+model Question {
+  id                 String                @id @default(cuid())
+  quizId             String
+  source             QuestionSource        @default(static)
+  status             QuestionStatus        @default(approved)
+  difficulty         String                @default("beginner")
+  text               String
+  options            String
+  correctOptionIndex Int
+  explanation        String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  quiz               Quiz                  @relation(fields: [quizId], references: [id])
+  translations       QuestionTranslation[]
+}
+
+model Attempt {
+  id             String    @id @default(cuid())
+  quizId         String
+  sessionId      String
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  score          Int?
+  totalQuestions Int?
+  paymentStatus  String    @default("unpaid")
+  email          String?
+  quiz           Quiz      @relation(fields: [quizId], references: [id])
+  payment        Payment?  @relation("PaymentOnAttempt")
+
+  @@index([sessionId])
+  @@index([paymentStatus])
+}
+
+model Payment {
+  id                    String   @id @default(cuid())
+  attemptId             String   @unique
+  stripeSessionId       String   @unique
+  stripePaymentIntentId String?
+  amount                Int
+  currency              String   @default("usd")
+  status                String   @default("pending")
+  createdAt             DateTime @default(now())
+  attempt               Attempt  @relation("PaymentOnAttempt", fields: [attemptId], references: [id])
+}
+
+model AdminUser {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  password     String
+  createdAt    DateTime      @default(now())
+  activityLogs ActivityLog[] @relation("AdminActivity")
+}
+
+model ActivityLog {
+  id        String    @id @default(cuid())
+  adminId   String
+  action    String
+  targetId  String?
+  timestamp DateTime  @default(now())
+  admin     AdminUser @relation("AdminActivity", fields: [adminId], references: [id])
+}
+
+model QuizTranslation {
+  id          String  @id @default(cuid())
+  locale      Locale
+  title       String
+  description String?
+  quizId      String
+  quiz        Quiz    @relation(fields: [quizId], references: [id])
+}
+
+model QuestionTranslation {
+  id          String   @id @default(cuid())
+  locale      Locale
+  text        String
+  options     String
+  explanation String?
+  questionId  String
+  question    Question @relation(fields: [questionId], references: [id])
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  interests  String
+  goal       String
+  experience String
+  dailyTime  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+enum QuestionSource {
+  static
+  ai_generated
+}
+
+enum QuestionStatus {
+  pending_review
+  approved
+  rejected
+}
+
+enum Locale {
+  en
+  ru
+  hi
+  pl
+  lt
+  es
+  fr
+  it
+  ro
+  he
+  zh
+  ar
+  ur
+}
