@@ -23,7 +23,7 @@ export const AuthLayout = ({ headerContent, children, onBack }: AuthLayoutProps)
   };
 
   return (
-    <div className="flex flex-col w-full h-[100dvh] bg-[#0A101D] relative overflow-hidden">
+    <div className="flex flex-col w-full min-h-[100dvh] bg-[#0A101D] relative overflow-y-auto">
       {/* Back Button */}
       <div className="absolute top-12 left-6 z-50">
         <button
@@ -36,7 +36,7 @@ export const AuthLayout = ({ headerContent, children, onBack }: AuthLayoutProps)
       </div>
 
       {/* Top Dark Section */}
-      <div className="relative w-full h-[45%] min-h-[340px] flex flex-col items-center justify-center pt-8 overflow-hidden z-0">
+      <div className="relative w-full h-[35vh] min-h-[240px] flex flex-col items-center justify-center pt-8 overflow-hidden z-0">
         {headerContent}
       </div>
 
@@ -45,7 +45,7 @@ export const AuthLayout = ({ headerContent, children, onBack }: AuthLayoutProps)
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 25 }}
-        className="flex-1 w-full bg-[#FAFBFF] rounded-t-[32px] sm:rounded-t-[40px] relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-8 overflow-y-auto"
+        className="flex-1 w-full bg-[#FAFBFF] rounded-t-[32px] sm:rounded-t-[40px] relative z-10 flex flex-col pt-8 pb-10 px-6 sm:px-8"
       >
         <div className="w-full max-w-md mx-auto flex-1 flex flex-col">{children}</div>
       </motion.div>
