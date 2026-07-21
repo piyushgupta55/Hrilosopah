@@ -70,7 +70,14 @@ export const OnboardingFlow = ({ initialStep = 0 }: { initialStep?: number }) =>
           />
         );
       case 2:
-        return <StepLearn key="step-2" onNext={nextStep} />;
+        return (
+          <StepLearn
+            key="step-2"
+            selectedInterests={state.interests}
+            onChange={(interests: string[]) => setState({ ...state, interests })}
+            onNext={nextStep}
+          />
+        );
       case 3:
         return (
           <StepInterests
