@@ -8,6 +8,7 @@ import { getTranslations } from 'next-intl/server';
 import { getServerSession } from 'next-auth/next';
 import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
 export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
   const session = await getServerSession(authOptions);
@@ -16,8 +17,16 @@ export default async function HomePage({ params: { locale } }: { params: { local
     redirect(`/${locale}/onboarding`);
   }
 
-  const userEmail = session.user?.email;
-  const userName = userEmail ? userEmail.split('@')[0] : 'Learner';
+  const userEmail = session.user?.email || '';
+
+  let dbUser = null;
+  if (userEmail) {
+    dbUser = await prisma.user.findUnique({
+      where: { email: userEmail },
+    });
+  }
+
+  const userName = dbUser?.name || userEmail.split('@')[0] || 'Learner';
   const userAvatarInitial = userName.charAt(0).toUpperCase();
 
   const t = await getTranslations('Home');
