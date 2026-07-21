@@ -131,7 +131,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
       <div className="px-5 w-full mb-8">
         <h3 className="font-bold text-gray-900 text-lg mb-4">{t('recommended')}</h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Link href={`/${locale}/quiz/ai-awareness`}>
             <div className="bg-white dark:bg-[#121722] rounded-[22px] p-5 shadow-sm border border-gray-100 dark:border-white/[0.06] flex flex-col items-center text-center h-full hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 relative overflow-hidden">
               <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-purple-500/10 to-transparent opacity-100"></div>
