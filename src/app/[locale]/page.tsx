@@ -6,11 +6,17 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 
 import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
 import { authOptions } from '@/lib/auth';
 
 export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
   const session = await getServerSession(authOptions);
-  const userEmail = session?.user?.email;
+
+  if (!session) {
+    redirect(`/${locale}/onboarding`);
+  }
+
+  const userEmail = session.user?.email;
   const userName = userEmail ? userEmail.split('@')[0] : 'Learner';
   const userAvatarInitial = userName.charAt(0).toUpperCase();
 
