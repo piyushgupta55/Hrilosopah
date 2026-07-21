@@ -29,6 +29,10 @@ export const OnboardingFlow = ({ initialStep = 0 }: { initialStep?: number }) =>
   const locale = useLocale();
   const [step, setStep] = useState(initialStep);
   const [direction, setDirection] = useState(1);
+
+  React.useEffect(() => {
+    setStep(initialStep);
+  }, [initialStep]);
   const [state, setState] = useState<OnboardingState>({
     interests: [],
     goal: '',
