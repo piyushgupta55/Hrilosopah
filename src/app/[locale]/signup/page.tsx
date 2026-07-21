@@ -13,12 +13,14 @@ import {
   BrainCircuit,
   Bitcoin,
   ShieldCheck,
+  User,
 } from 'lucide-react';
 import { AuthLayout } from '@/components/auth/AuthLayout';
 
 export default function SignupPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +28,7 @@ export default function SignupPage() {
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!name || !email || !password) {
       setError('Please fill in all fields');
       return;
     }
@@ -47,7 +49,7 @@ export default function SignupPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, ...onboardingState }),
+        body: JSON.stringify({ name, email, password, ...onboardingState }),
       });
 
       if (!res.ok) {
@@ -148,6 +150,20 @@ export default function SignupPage() {
               {error}
             </div>
           )}
+          <div className="space-y-1.5">
+            <label className="text-[14px] font-bold text-[#111827]">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="John Doe"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full pl-11 pr-4 py-4 bg-white border border-border/80 rounded-[16px] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-all placeholder:text-gray-400 text-[#111827] font-medium"
+              />
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <label className="text-[14px] font-bold text-[#111827]">Email</label>
             <div className="relative">

@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { email, password, interests, goal, experience, dailyTime } = body;
+    const { name, email, password, interests, goal, experience, dailyTime } = body;
 
     if (!email || !password) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 });
@@ -27,6 +27,7 @@ export async function POST(req: Request) {
       data: {
         email,
         password: hashedPassword,
+        name: name || null,
         interests: JSON.stringify(interests || []),
         goal: goal || '',
         experience: experience || '',
