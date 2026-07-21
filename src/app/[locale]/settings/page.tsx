@@ -1,13 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 import {
   ChevronLeft,
   ChevronRight,
   User,
   Mail,
   Bell,
-  Shield,
   Moon,
   Globe,
   Sliders,
@@ -19,8 +21,18 @@ import {
 } from 'lucide-react';
 import { SettingsLogoutButton } from '@/components/settings/SettingsLogoutButton';
 
-export default function SettingsPage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('Settings');
+export default async function SettingsPage({ params: { locale } }: { params: { locale: string } }) {
+  const t = await getTranslations('Settings');
+  const session = await getServerSession(authOptions);
+
+  let dbUser = null;
+  if (session?.user?.email) {
+    dbUser = await prisma.user.findUnique({
+      where: { email: session.user.email },
+    });
+  }
+
+  const userDifficulty = dbUser?.experience || 'beginner';
 
   return (
     <div className="flex-1 w-full bg-[#F8F9FA] flex flex-col overflow-y-auto overflow-x-hidden relative">
@@ -122,7 +134,7 @@ export default function SettingsPage({ params: { locale } }: { params: { locale:
                 <span className="font-semibold text-sm text-gray-900">{t('difficulty')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500 font-medium">{t('beginner')}</span>
+                <span className="text-xs text-gray-500 font-medium">{t(userDifficulty)}</span>
                 <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
             </Link>

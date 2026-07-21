@@ -18,19 +18,13 @@ export default async function PersonalInfoPage() {
   }
 
   const defaultName = dbUser?.name || userEmail?.split('@')[0] || '';
-  const defaultUsername = dbUser?.username || defaultName.toLowerCase();
-  const defaultPhone = dbUser?.phone || '';
 
   const t = await getTranslations('Settings');
 
   return (
     <SettingsSubpageLayout title={t('personalInfo')}>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-5">
-        <PersonalInfoForm
-          initialName={defaultName}
-          initialUsername={defaultUsername}
-          initialPhone={defaultPhone}
-        />
+        <PersonalInfoForm initialName={defaultName} />
       </div>
     </SettingsSubpageLayout>
   );

@@ -6,19 +6,11 @@ import { useTranslations } from 'next-intl';
 
 interface PersonalInfoFormProps {
   initialName: string;
-  initialUsername: string;
-  initialPhone: string;
 }
 
-export const PersonalInfoForm = ({
-  initialName,
-  initialUsername,
-  initialPhone,
-}: PersonalInfoFormProps) => {
+export const PersonalInfoForm = ({ initialName }: PersonalInfoFormProps) => {
   const t = useTranslations('Settings');
   const [name, setName] = useState(initialName);
-  const [username, setUsername] = useState(initialUsername);
-  const [phone, setPhone] = useState(initialPhone);
 
   const [status, setStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,16 +21,11 @@ export const PersonalInfoForm = ({
     setErrorMessage('');
 
     try {
-      // Remove leading '@' if entered in username
-      const cleanUsername = username.replace(/^@/, '').trim();
-
       const res = await fetch('/api/user/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          username: cleanUsername,
-          phone: phone.trim(),
         }),
       });
 
@@ -67,31 +54,6 @@ export const PersonalInfoForm = ({
           onChange={(e) => setName(e.target.value)}
           className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           placeholder="Enter full name"
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-bold text-gray-700 ml-1">{t('username')}</label>
-        <div className="relative flex items-center">
-          <span className="absolute left-4 text-gray-400 text-sm font-semibold select-none">@</span>
-          <input
-            type="text"
-            value={username.replace(/^@/, '')}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-8 pr-4 py-3 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-            placeholder="username"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <label className="text-sm font-bold text-gray-700 ml-1">{t('phoneNumber')}</label>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder={t('addPhone')}
-          className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
         />
       </div>
 
