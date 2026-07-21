@@ -47,7 +47,7 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
             <div className="relative w-[180px] h-[220px] bg-white border-[3px] border-[#E5E7EB] rounded-[24px] shadow-sm transform -rotate-12 z-10 flex flex-col overflow-hidden">
               {/* Screen */}
               <div className="flex-1 m-2 border-[2px] border-[#F3F4F6] rounded-[16px] bg-gradient-to-b from-[#FAFAFA] to-white flex items-center justify-center">
-                <div className="w-16 h-16 bg-[#1D4ED8] border-[3px] border-gray-200 rounded-full flex items-center justify-center shadow-lg">
+                <div className="w-16 h-16 bg-[#0052FF] border-[3px] border-gray-400 rounded-full flex items-center justify-center shadow-lg">
                   <span className="text-3xl font-black text-white tracking-tighter">H</span>
                 </div>
               </div>
@@ -57,9 +57,9 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-              className="absolute left-[10%] bottom-[20%] w-14 h-14 bg-white border-[3px] border-[#10B981] rounded-full shadow-lg z-20 flex items-center justify-center text-[#10B981]"
+              className="absolute left-[10%] bottom-[20%] w-14 h-14 bg-white border-[3px] border-[#22C55E] rounded-full shadow-lg z-20 flex items-center justify-center text-[#22C55E]"
             >
-              <Bitcoin className="w-8 h-8" />
+              <Bitcoin className="w-8 h-8 text-[#22C55E] fill-[#22C55E]/10" />
             </motion.div>
 
             {/* Floating Brain */}
