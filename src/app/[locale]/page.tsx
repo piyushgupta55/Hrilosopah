@@ -3,12 +3,23 @@ import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
 import { Bell, ChevronRight, Check, Flame, Hexagon, Brain } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function HomePage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('Home');
-  const tExplore = useTranslations('Explore');
-  const tCards = useTranslations('Cards');
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+
+export default async function HomePage({ params: { locale } }: { params: { locale: string } }) {
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email;
+  const userName = userEmail ? userEmail.split('@')[0] : 'Learner';
+  const userAvatarInitial = userName.charAt(0).toUpperCase();
+
+  const t = await getTranslations('Home');
+  const tExplore = await getTranslations('Explore');
+  const tCards = await getTranslations('Cards');
+
+  // Dynamically replace hardcoded greeting name in internationalized messages
+  const greetingText = t('greeting').replace('Piyush', userName);
 
   return (
     <div
@@ -24,7 +35,7 @@ export default function HomePage({ params: { locale } }: { params: { locale: str
             className="w-9 h-9 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-sm hover:opacity-80 transition-opacity"
           >
             <div className="w-full h-full bg-blue-100 flex items-center justify-center text-sm font-bold text-blue-600">
-              P
+              {userAvatarInitial}
             </div>
           </Link>
         </div>
@@ -33,7 +44,7 @@ export default function HomePage({ params: { locale } }: { params: { locale: str
       {/* Greeting */}
       <div className="px-5 w-full mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-1">
-          {t('greeting')}{' '}
+          {greetingText}{' '}
           <span className="inline-block origin-bottom-right hover:animate-wave">👋</span>
         </h2>
         <p className="text-gray-500 text-sm">{t('letsLearn')}</p>

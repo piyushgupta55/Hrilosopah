@@ -1,10 +1,17 @@
 import React from 'react';
 import { SettingsSubpageLayout } from '@/components/settings/SettingsSubpageLayout';
 import { Save } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function PersonalInfoPage() {
-  const t = useTranslations('Settings');
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+
+export default async function PersonalInfoPage() {
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email || 'user@example.com';
+  const userName = userEmail.split('@')[0];
+
+  const t = await getTranslations('Settings');
 
   return (
     <SettingsSubpageLayout title={t('personalInfo')}>
@@ -13,7 +20,7 @@ export default function PersonalInfoPage() {
           <label className="text-sm font-bold text-gray-700 ml-1">{t('fullName')}</label>
           <input
             type="text"
-            defaultValue="Piyush Gupta"
+            defaultValue={userName}
             className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           />
         </div>
@@ -22,7 +29,7 @@ export default function PersonalInfoPage() {
           <label className="text-sm font-bold text-gray-700 ml-1">{t('username')}</label>
           <input
             type="text"
-            defaultValue="@piyush_explorer"
+            defaultValue={`@${userName}`}
             className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           />
         </div>

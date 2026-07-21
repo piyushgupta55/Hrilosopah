@@ -17,14 +17,28 @@ import {
   Brain,
 } from 'lucide-react';
 import Image from 'next/image';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 
-export default function ProfilePage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('Profile');
-  const tHome = useTranslations('Home');
-  const tProgress = useTranslations('Progress');
-  const tSettings = useTranslations('Settings');
-  const tCards = useTranslations('Cards');
+import { getServerSession } from 'next-auth/next';
+import { redirect } from 'next/navigation';
+import { authOptions } from '@/lib/auth';
+
+export default async function ProfilePage({ params: { locale } }: { params: { locale: string } }) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect(`/${locale}/login`);
+  }
+
+  const userEmail = session.user?.email || 'Learner';
+  const userName = userEmail.split('@')[0];
+  const userAvatarInitial = userName.charAt(0).toUpperCase();
+
+  const t = await getTranslations('Profile');
+  const tHome = await getTranslations('Home');
+  const tProgress = await getTranslations('Progress');
+  const tSettings = await getTranslations('Settings');
+  const tCards = await getTranslations('Cards');
 
   return (
     <div
@@ -55,7 +69,7 @@ export default function ProfilePage({ params: { locale } }: { params: { locale: 
             <div className="w-24 h-24 rounded-full bg-white p-1 shadow-lg">
               <div className="w-full h-full rounded-full bg-blue-100 flex items-center justify-center overflow-hidden">
                 {/* Fallback avatar */}
-                <span className="text-4xl text-blue-600 font-bold">P</span>
+                <span className="text-4xl text-blue-600 font-bold">{userAvatarInitial}</span>
               </div>
             </div>
             <button className="absolute bottom-0 right-0 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md text-blue-600">
@@ -63,7 +77,7 @@ export default function ProfilePage({ params: { locale } }: { params: { locale: 
             </button>
           </div>
 
-          <h2 className="text-2xl font-bold text-white mb-1">Piyush Gupta</h2>
+          <h2 className="text-2xl font-bold text-white mb-1">{userName}</h2>
           <div className="flex items-center gap-1.5 text-blue-100 mb-4">
             <Award className="w-4 h-4" />
             <span className="text-sm font-medium">{t('knowledgeExplorer')}</span>
