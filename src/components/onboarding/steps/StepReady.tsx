@@ -5,12 +5,15 @@ import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { Trophy, ChevronRight, Brain, Bitcoin } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepReadyProps {
   onNext: () => void;
 }
 
 export const StepReady = ({ onNext }: StepReadyProps) => {
+  const t = useTranslations('Onboarding');
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -20,8 +23,8 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
     >
       <div>
         <StepHeader
-          title={<span className="text-[#0052FF]">You&apos;re all set!</span>}
-          subtitle="Your personalized learning journey starts now."
+          title={<span className="text-[#0052FF]">{t('readyTitle')}</span>}
+          subtitle={t('readySubtitle')}
         />
 
         {/* Custom Illustration */}
@@ -77,15 +80,15 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
         </div>
 
         <div className="mt-2">
-          <h3 className="font-bold text-[15px] text-[#111827] mb-3">Recommended for you</h3>
+          <h3 className="font-bold text-[15px] text-[#111827] mb-3">{t('recommendedForYou')}</h3>
           <div className="space-y-3">
             <div className="flex items-center p-3 border border-[#F3F4F6] rounded-[16px] shadow-sm bg-white">
               <div className="w-10 h-10 rounded-[10px] bg-[#F5F3FF] flex items-center justify-center mr-3">
                 <Brain className="w-6 h-6 text-[#8B5CF6]" />
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-[14px] text-[#111827]">AI Awareness Quiz</h4>
-                <p className="text-[12px] text-[#6B7280]">Beginner • 10-15 Qs</p>
+                <h4 className="font-bold text-[14px] text-[#111827]">{t('aiAwarenessQuiz')}</h4>
+                <p className="text-[12px] text-[#6B7280]">{t('aiQuizDesc')}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-[#9CA3AF]" />
             </div>
@@ -95,8 +98,8 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
                 <Bitcoin className="w-6 h-6 text-[#8B5CF6]" />
               </div>
               <div className="flex-1">
-                <h4 className="font-bold text-[14px] text-[#111827]">Crypto Fundamentals</h4>
-                <p className="text-[12px] text-[#6B7280]">Beginner • 10-15 Qs</p>
+                <h4 className="font-bold text-[14px] text-[#111827]">{t('cryptoFundamentals')}</h4>
+                <p className="text-[12px] text-[#6B7280]">{t('cryptoQuizDesc')}</p>
               </div>
               <ChevronRight className="w-5 h-5 text-[#9CA3AF]" />
             </div>
@@ -105,12 +108,12 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
       </div>
 
       <div className="w-full mt-8 space-y-3">
-        <PrimaryButton label="Start Exploring" onClick={onNext} />
+        <PrimaryButton label={t('startExploring')} onClick={onNext} />
         <button
           onClick={onNext}
           className="w-full py-4 text-[#6B7280] font-semibold text-[15px] hover:text-[#111827] transition-colors rounded-2xl"
         >
-          Maybe later
+          {t('maybeLater')}
         </button>
       </div>
     </motion.div>

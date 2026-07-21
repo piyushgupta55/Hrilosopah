@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { OptionCard } from '../OptionCard';
+import { useTranslations } from 'next-intl';
 
 interface StepTimeProps {
   time: string;
@@ -36,13 +37,22 @@ const ClockIcon = ({ minutes }: { minutes: number }) => {
 };
 
 const TIME_OPTIONS = [
-  { id: '5', label: '5 Minutes', desc: 'Quick and easy', icon: <ClockIcon minutes={5} /> },
-  { id: '10', label: '10 Minutes', desc: 'Great start', icon: <ClockIcon minutes={10} /> },
-  { id: '15', label: '15 Minutes', desc: 'Good progress', icon: <ClockIcon minutes={15} /> },
-  { id: '20+', label: '20+ Minutes', desc: "Let's go all in", icon: <ClockIcon minutes={20} /> },
+  { id: '5', minutes: 5 },
+  { id: '10', minutes: 10 },
+  { id: '15', minutes: 15 },
+  { id: '20+', minutes: 20 },
 ];
 
 export const StepTime = ({ time, onChange, onNext }: StepTimeProps) => {
+  const t = useTranslations('Onboarding');
+
+  const getKeys = (id: string) => {
+    if (id === '5') return { labelKey: 'time5m', descKey: 'time5mDesc' };
+    if (id === '10') return { labelKey: 'time10m', descKey: 'time10mDesc' };
+    if (id === '15') return { labelKey: 'time15m', descKey: 'time15mDesc' };
+    return { labelKey: 'time20m', descKey: 'time20mDesc' };
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -54,35 +64,38 @@ export const StepTime = ({ time, onChange, onNext }: StepTimeProps) => {
         <StepHeader
           title={
             <>
-              Set your daily <br />
-              <span className="text-[#0052FF]">learning goal</span>
+              {t('timeTitle')} <br />
+              <span className="text-[#0052FF]">{t('timeTitleHighlight')}</span>
             </>
           }
-          subtitle="Small steps every day lead to big results."
+          subtitle={t('timeSubtitle')}
         />
 
         <div className="flex flex-col space-y-3">
-          {TIME_OPTIONS.map((option, i) => (
-            <motion.div
-              key={option.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <OptionCard
-                label={option.label}
-                description={option.desc}
-                icon={option.icon}
-                selected={time === option.id}
-                onClick={() => onChange(option.id)}
-              />
-            </motion.div>
-          ))}
+          {TIME_OPTIONS.map((option, i) => {
+            const { labelKey, descKey } = getKeys(option.id);
+            return (
+              <motion.div
+                key={option.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <OptionCard
+                  label={t(labelKey)}
+                  description={t(descKey)}
+                  icon={<ClockIcon minutes={option.minutes} />}
+                  selected={time === option.id}
+                  onClick={() => onChange(option.id)}
+                />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
       <div className="w-full mt-8">
-        <PrimaryButton label="Continue" onClick={onNext} disabled={!time} />
+        <PrimaryButton label={t('continue')} onClick={onNext} disabled={!time} />
       </div>
     </motion.div>
   );

@@ -6,6 +6,7 @@ import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { OptionCard } from '../OptionCard';
 import { Briefcase, BookOpen, UserCircle, Bell, Smile } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepGoalProps {
   goal: string;
@@ -16,24 +17,29 @@ interface StepGoalProps {
 const GOAL_OPTIONS = [
   {
     id: 'career',
-    label: 'Improve my career',
     icon: <Briefcase className="w-5 h-5" strokeWidth={2} />,
   },
   {
-    id: 'new',
-    label: 'Learn something new',
+    id: 'learn',
     icon: <BookOpen className="w-5 h-5" strokeWidth={2} />,
   },
   {
     id: 'interviews',
-    label: 'Prepare for interviews',
     icon: <UserCircle className="w-5 h-5" strokeWidth={2} />,
   },
-  { id: 'updated', label: 'Stay updated', icon: <Bell className="w-5 h-5" strokeWidth={2} /> },
-  { id: 'curious', label: 'Just curious', icon: <Smile className="w-5 h-5" strokeWidth={2} /> },
+  { id: 'updated', icon: <Bell className="w-5 h-5" strokeWidth={2} /> },
+  { id: 'curious', icon: <Smile className="w-5 h-5" strokeWidth={2} /> },
 ];
 
 export const StepGoal = ({ goal, onChange, onNext }: StepGoalProps) => {
+  const t = useTranslations('Onboarding');
+
+  // Map option ID to translation key
+  const getLabelKey = (id: string) => {
+    if (id === 'learn') return 'goalLearn';
+    return `goal${id.charAt(0).toUpperCase() + id.slice(1)}`;
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -45,11 +51,11 @@ export const StepGoal = ({ goal, onChange, onNext }: StepGoalProps) => {
         <StepHeader
           title={
             <>
-              What&apos;s your <br />
-              <span className="text-[#0052FF]">learning goal?</span>
+              {t('goalTitle')} <br />
+              <span className="text-[#0052FF]">{t('goalTitleHighlight')}</span>
             </>
           }
-          subtitle="This helps us recommend the right quizzes for you."
+          subtitle={t('goalSubtitle')}
         />
 
         <div className="flex flex-col space-y-3">
@@ -61,7 +67,7 @@ export const StepGoal = ({ goal, onChange, onNext }: StepGoalProps) => {
               transition={{ delay: i * 0.05 }}
             >
               <OptionCard
-                label={option.label}
+                label={t(getLabelKey(option.id))}
                 icon={option.icon}
                 selected={goal === option.id}
                 onClick={() => onChange(option.id)}
@@ -72,7 +78,7 @@ export const StepGoal = ({ goal, onChange, onNext }: StepGoalProps) => {
       </div>
 
       <div className="w-full mt-8">
-        <PrimaryButton label="Continue" onClick={onNext} disabled={!goal} />
+        <PrimaryButton label={t('continue')} onClick={onNext} disabled={!goal} />
       </div>
     </motion.div>
   );

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { PrimaryButton } from '../PrimaryButton';
 import { StepHeader } from '../StepHeader';
 import { Bitcoin, Brain } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepWelcomeProps {
   onNext: () => void;
@@ -12,6 +13,8 @@ interface StepWelcomeProps {
 }
 
 export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
+  const t = useTranslations('Onboarding');
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -23,11 +26,11 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
         <StepHeader
           title={
             <>
-              Welcome to <br />
+              {t('welcomeTitle')} <br />
               <span className="text-[#1D4ED8]">Hrilosopah</span>
             </>
           }
-          subtitle="Master AI & Crypto knowledge with fun, interactive quizzes."
+          subtitle={t('welcomeSubtitle')}
         />
 
         {/* Custom SVG Illustration Area */}
@@ -110,12 +113,12 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
       </div>
 
       <div className="w-full space-y-4">
-        <PrimaryButton label="Get Started" onClick={onNext} />
+        <PrimaryButton label={t('getStarted')} onClick={onNext} />
         <button
           onClick={onSkip}
           className="w-full py-4 text-[#6B7280] font-semibold text-[15px] hover:text-[#111827] transition-colors rounded-2xl"
         >
-          Skip for now
+          {t('skipForNow')}
         </button>
       </div>
     </motion.div>

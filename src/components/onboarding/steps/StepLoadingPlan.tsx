@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { CheckCircle2, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepLoadingPlanProps {
   onComplete: () => void;
@@ -11,6 +12,7 @@ interface StepLoadingPlanProps {
 
 export const StepLoadingPlan = ({ onComplete }: StepLoadingPlanProps) => {
   const [step, setStep] = useState(0);
+  const t = useTranslations('Onboarding');
 
   useEffect(() => {
     const t1 = setTimeout(() => setStep(1), 800);
@@ -26,11 +28,7 @@ export const StepLoadingPlan = ({ onComplete }: StepLoadingPlanProps) => {
     };
   }, [onComplete]);
 
-  const loadingSteps = [
-    'Understanding your interests',
-    'Planning your quizzes',
-    'Preparing your journey',
-  ];
+  const loadingSteps = [t('planInterests'), t('planQuizzes'), t('planJourney')];
 
   return (
     <motion.div
@@ -43,11 +41,11 @@ export const StepLoadingPlan = ({ onComplete }: StepLoadingPlanProps) => {
         <StepHeader
           title={
             <>
-              Creating your <br />
-              <span className="text-[#0052FF]">learning plan...</span>
+              {t('planTitle')} <br />
+              <span className="text-[#0052FF]">{t('planTitleHighlight')}</span>
             </>
           }
-          subtitle="This will only take a few seconds."
+          subtitle={t('planSubtitle')}
         />
       </div>
 

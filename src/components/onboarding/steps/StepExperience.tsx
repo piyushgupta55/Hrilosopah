@@ -6,6 +6,7 @@ import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { OptionCard } from '../OptionCard';
 import { UserSearch } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepExperienceProps {
   experience: string;
@@ -30,26 +31,30 @@ const ChartIcon = ({ level }: { level: number }) => (
 const EXP_OPTIONS = [
   {
     id: 'beginner',
-    label: 'Beginner',
-    desc: 'Just getting started',
     icon: <ChartIcon level={1} />,
   },
   {
     id: 'intermediate',
-    label: 'Intermediate',
-    desc: 'Some knowledge',
     icon: <ChartIcon level={2} />,
   },
-  { id: 'advanced', label: 'Advanced', desc: 'Very familiar', icon: <ChartIcon level={3} /> },
+  { id: 'advanced', icon: <ChartIcon level={3} /> },
   {
     id: 'notsure',
-    label: 'Not sure',
-    desc: 'Help me decide',
     icon: <UserSearch className="w-5 h-5" strokeWidth={2} />,
   },
 ];
 
 export const StepExperience = ({ experience, onChange, onNext }: StepExperienceProps) => {
+  const t = useTranslations('Onboarding');
+
+  const getKeys = (id: string) => {
+    if (id === 'notsure') {
+      return { labelKey: 'expNotSure', descKey: 'expNotSureDesc' };
+    }
+    const cap = id.charAt(0).toUpperCase() + id.slice(1);
+    return { labelKey: `exp${cap}`, descKey: `exp${cap}Desc` };
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 50 }}
@@ -61,35 +66,38 @@ export const StepExperience = ({ experience, onChange, onNext }: StepExperienceP
         <StepHeader
           title={
             <>
-              How familiar are <br />
-              you with <span className="text-[#0052FF]">AI & Crypto?</span>
+              {t('familiarTitle')} <br />
+              you with <span className="text-[#0052FF]">{t('familiarTitleHighlight')}</span>
             </>
           }
-          subtitle="We'll tailor the difficulty to your level."
+          subtitle={t('familiarSubtitle')}
         />
 
         <div className="flex flex-col space-y-3">
-          {EXP_OPTIONS.map((option, i) => (
-            <motion.div
-              key={option.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-            >
-              <OptionCard
-                label={option.label}
-                description={option.desc}
-                icon={option.icon}
-                selected={experience === option.id}
-                onClick={() => onChange(option.id)}
-              />
-            </motion.div>
-          ))}
+          {EXP_OPTIONS.map((option, i) => {
+            const { labelKey, descKey } = getKeys(option.id);
+            return (
+              <motion.div
+                key={option.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+              >
+                <OptionCard
+                  label={t(labelKey)}
+                  description={t(descKey)}
+                  icon={option.icon}
+                  selected={experience === option.id}
+                  onClick={() => onChange(option.id)}
+                />
+              </motion.div>
+            );
+          })}
         </div>
       </div>
 
       <div className="w-full mt-8">
-        <PrimaryButton label="Continue" onClick={onNext} disabled={!experience} />
+        <PrimaryButton label={t('continue')} onClick={onNext} disabled={!experience} />
       </div>
     </motion.div>
   );

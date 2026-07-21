@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { Brain, Coins, FileQuestion } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface StepLearnProps {
   selectedInterests: string[];
@@ -13,25 +14,27 @@ interface StepLearnProps {
 }
 
 export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProps) => {
+  const t = useTranslations('Onboarding');
+
   const cards = [
     {
       id: 'ai',
-      title: 'Artificial Intelligence',
-      desc: 'Understand the power of intelligent systems.',
+      title: t('aiTitle'),
+      desc: t('aiDesc'),
       icon: <Brain className="w-8 h-8 text-[#8B5CF6]" />,
       bg: 'bg-[#F5F3FF]',
     },
     {
       id: 'crypto',
-      title: 'Crypto & Blockchain',
-      desc: "Learn the language of tomorrow's finance.",
+      title: t('cryptoTitle'),
+      desc: t('cryptoDesc'),
       icon: <Coins className="w-8 h-8 text-[#8B5CF6]" />,
       bg: 'bg-[#F5F3FF]',
     },
     {
       id: 'tech',
-      title: 'Interactive Quizzes',
-      desc: 'Bite-sized questions that make learning fun.',
+      title: t('quizTitle'),
+      desc: t('quizDesc'),
       icon: <FileQuestion className="w-8 h-8 text-[#8B5CF6]" />,
       bg: 'bg-[#F5F3FF]',
     },
@@ -56,11 +59,11 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
         <StepHeader
           title={
             <>
-              Learn what <br />
-              <span className="text-[#0052FF]">matters most</span>
+              {t('learnTitle')} <br />
+              <span className="text-[#0052FF]">{t('learnTitleHighlight')}</span>
             </>
           }
-          subtitle="Explore topics that shape the future."
+          subtitle={t('learnSubtitle')}
         />
 
         <div className="flex flex-col space-y-4">
@@ -114,7 +117,7 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
       </div>
 
       <div className="w-full mt-8">
-        <PrimaryButton label="Continue" onClick={onNext} />
+        <PrimaryButton label={t('continue')} onClick={onNext} />
       </div>
     </motion.div>
   );
