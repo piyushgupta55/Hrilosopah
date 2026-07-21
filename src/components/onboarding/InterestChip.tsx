@@ -32,13 +32,13 @@ export const InterestChip = ({ label, icon, selected, onClick }: InterestChipPro
 
       {/* Selection Checkmark */}
       <div
-        className={`absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white transition-opacity ${selected ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute top-2 right-2 w-6 h-6 rounded-full bg-white transition-opacity ${selected ? 'opacity-100' : 'opacity-0'}`}
       >
         <CheckCircle2 className="w-6 h-6 text-[#0052FF]" fill="white" />
       </div>
       {/* Empty circle when unselected */}
       <div
-        className={`absolute -top-2 -right-2 w-6 h-6 rounded-full border-2 border-[#E5E7EB] bg-white transition-opacity ${!selected ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute top-2 right-2 w-6 h-6 rounded-full border-2 border-[#E5E7EB] bg-white transition-opacity ${!selected ? 'opacity-100' : 'opacity-0'}`}
       />
     </motion.button>
   );
