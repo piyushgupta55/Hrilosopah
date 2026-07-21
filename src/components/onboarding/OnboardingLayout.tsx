@@ -24,7 +24,7 @@ export const OnboardingLayout = ({ children, currentStep = 0 }: OnboardingLayout
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 w-full max-w-sm mx-auto px-6 flex flex-col relative z-0 overflow-y-auto">
+      <div className="flex-1 w-full max-w-sm mx-auto px-6 pb-8 flex flex-col relative z-0 overflow-y-auto">
         {children}
       </div>
     </div>
