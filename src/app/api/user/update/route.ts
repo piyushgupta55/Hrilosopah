@@ -10,15 +10,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, username, phone } = await request.json();
+    const { name, username, phone, experience } = await request.json();
+
+    const updateData: any = {};
+    if (name !== undefined) updateData.name = name || null;
+    if (username !== undefined) updateData.username = username || null;
+    if (phone !== undefined) updateData.phone = phone || null;
+    if (experience !== undefined) updateData.experience = experience || '';
 
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email },
-      data: {
-        name: name || null,
-        username: username || null,
-        phone: phone || null,
-      },
+      data: updateData,
     });
 
     return NextResponse.json({ success: true, user: updatedUser });

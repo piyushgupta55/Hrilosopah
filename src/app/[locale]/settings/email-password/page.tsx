@@ -1,14 +1,26 @@
 import React from 'react';
 import { SettingsSubpageLayout } from '@/components/settings/SettingsSubpageLayout';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { ChangePasswordForm } from '@/components/settings/ChangePasswordForm';
 
-export default function PlaceholderPage() {
+interface Props {
+  params: {
+    locale: string;
+  };
+}
+
+export default async function EmailPasswordPage({ params: { locale } }: Props) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) {
+    redirect(`/${locale}/login`);
+  }
+
   return (
     <SettingsSubpageLayout title="Email & Password">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[300px]">
-        <h2 className="text-xl font-bold text-gray-900">Email & Password</h2>
-        <p className="text-sm text-gray-500 max-w-[250px]">
-          This section is currently under construction. Check back soon for updates!
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-5">
+        <ChangePasswordForm email={session.user.email} />
       </div>
     </SettingsSubpageLayout>
   );

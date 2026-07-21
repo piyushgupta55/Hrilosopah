@@ -53,21 +53,11 @@ export default function SettingsPage({ params: { locale } }: { params: { locale:
             </Link>
             <Link
               href={`/${locale}/settings/email-password`}
-              className="w-full px-5 py-4 flex items-center justify-between border-b border-gray-50 hover:bg-gray-50 transition-colors"
+              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-gray-500" />
                 <span className="font-semibold text-sm text-gray-900">{t('emailPassword')}</span>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400" />
-            </Link>
-            <Link
-              href={`/${locale}/settings/privacy`}
-              className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <Shield className="w-5 h-5 text-gray-500" />
-                <span className="font-semibold text-sm text-gray-900">{t('privacy')}</span>
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </Link>

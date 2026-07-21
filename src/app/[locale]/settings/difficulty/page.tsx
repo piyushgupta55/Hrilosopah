@@ -1,14 +1,33 @@
 import React from 'react';
 import { SettingsSubpageLayout } from '@/components/settings/SettingsSubpageLayout';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import { prisma } from '@/lib/prisma';
+import { DifficultySettingsForm } from '@/components/settings/DifficultySettingsForm';
 
-export default function PlaceholderPage() {
+interface Props {
+  params: {
+    locale: string;
+  };
+}
+
+export default async function DifficultySettingsPage({ params: { locale } }: Props) {
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user?.email) {
+    redirect(`/${locale}/login`);
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+  });
+
+  const currentDifficulty = user?.experience || 'beginner';
+
   return (
     <SettingsSubpageLayout title="Default Quiz Difficulty">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-8 flex flex-col items-center justify-center text-center gap-4 min-h-[300px]">
-        <h2 className="text-xl font-bold text-gray-900">Default Quiz Difficulty</h2>
-        <p className="text-sm text-gray-500 max-w-[250px]">
-          This section is currently under construction. Check back soon for updates!
-        </p>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden p-5">
+        <DifficultySettingsForm initialDifficulty={currentDifficulty} />
       </div>
     </SettingsSubpageLayout>
   );
