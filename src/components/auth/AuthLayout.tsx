@@ -23,7 +23,7 @@ export const AuthLayout = ({ headerContent, children, onBack }: AuthLayoutProps)
   };
 
   return (
-    <div className="flex flex-col w-full h-screen min-h-[100dvh] bg-[#0A101D] relative overflow-hidden">
+    <div className="flex flex-col w-full h-[100dvh] bg-[#0A101D] relative overflow-hidden">
       {/* Back Button */}
       <div className="absolute top-12 left-6 z-50">
         <button
