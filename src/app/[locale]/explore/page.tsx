@@ -112,7 +112,7 @@ export default function ExplorePage({ params: { locale } }: { params: { locale: 
         <div className="px-5 w-full mb-8">
           <h3 className="font-bold text-gray-900 text-lg mb-4">{t('topCategories')}</h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <Link href={`/${locale}/explore/category/ai`}>
               <div className="bg-[#7B61FF] rounded-xl p-5 text-white flex flex-col items-center justify-center text-center h-40 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
                 <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
