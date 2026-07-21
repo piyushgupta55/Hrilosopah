@@ -69,7 +69,7 @@ export default async function RootLayout({
         suppressHydrationWarning
       >
         <NextIntlClientProvider messages={messages}>
-          <div className="mx-auto w-full max-w-md min-h-[100dvh] bg-white dark:bg-[#0B0D12] shadow-xl relative overflow-hidden flex flex-col">
+          <div className="mx-auto w-full max-w-md md:max-w-3xl lg:max-w-5xl min-h-[100dvh] md:min-h-0 md:my-8 bg-white dark:bg-[#0B0D12] shadow-xl md:rounded-3xl md:border md:border-gray-100 md:dark:border-gray-800 relative overflow-hidden flex flex-col">
             {children}
           </div>
         </NextIntlClientProvider>

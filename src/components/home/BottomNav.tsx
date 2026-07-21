@@ -40,7 +40,7 @@ export const BottomNav = () => {
   ];
 
   return (
-    <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md shrink-0 bg-white/95 backdrop-blur-lg border-t border-border shadow-[0_-8px_16px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] z-50">
+    <footer className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md md:max-w-3xl lg:max-w-5xl shrink-0 bg-white/95 dark:bg-[#0B0D12]/95 backdrop-blur-lg border-t border-border dark:border-[#1F2533] shadow-[0_-8px_16px_rgba(0,0,0,0.05)] pb-[env(safe-area-inset-bottom)] md:rounded-b-3xl z-50">
       <div className="flex justify-around items-center px-4 py-3">
         {navItems.map((item) => {
           const isActive = item.activeRegex.test(pathname);
