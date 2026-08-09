@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
-import { Zap, Clock, HelpCircle, Gift, Brain, Bot } from 'lucide-react';
+import { Zap, Clock, HelpCircle, Gift, Brain, Bot, Bitcoin } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export default function PlayPage({ params: { locale } }: { params: { locale: string } }) {
@@ -16,7 +16,7 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
     >
       {/* Header */}
       <div className="px-5 w-full flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{t('title')}</h1>
+        <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Quizzes</h1>
         <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
           <Zap className="w-4 h-4 text-orange-400 fill-orange-400" />
           <span className="text-sm font-bold text-gray-900">3/5</span>
@@ -65,8 +65,8 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
                 <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-4">
                   {tCards('level', { num: 1 })}
                 </div>
-                <div className="text-5xl self-center mb-4 mt-2 font-bold opacity-90 drop-shadow-sm">
-                  ₿
+                <div className="self-center mb-4 mt-2 flex items-center justify-center">
+                  <Bitcoin className="w-14 h-14 text-white" strokeWidth={1.8} />
                 </div>
                 <h4 className="font-bold text-sm leading-tight mt-auto mb-3">
                   {tCards('cryptoBasics')}
@@ -139,8 +139,8 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
 
           <Link href={`/${locale}/quiz/crypto-fact-myth`}>
             <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-[14px] bg-[#E0F2FE] flex items-center justify-center shrink-0 text-2xl font-bold text-[#3B82F6] relative">
-                ₿
+              <div className="w-14 h-14 rounded-[14px] bg-[#E0F2FE] flex items-center justify-center shrink-0 text-[#3B82F6] relative">
+                <Bitcoin className="w-8 h-8" strokeWidth={1.8} />
                 <div className="absolute -bottom-1 -right-1 bg-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm">
                   <HelpCircle className="w-3 h-3 text-[#3B82F6]" />
                 </div>

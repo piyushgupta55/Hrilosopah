@@ -1,24 +1,16 @@
-import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import {
-  X,
-  Lock,
-  ArrowRight,
-  ShieldCheck,
-  BarChart2,
-  Target,
-  FileText,
-  ChevronRight,
-} from 'lucide-react';
+import { X, Lock, ShieldCheck } from 'lucide-react';
+import { UnlockButton } from '@/components/quiz/UnlockButton';
 
 export default async function SummaryPage({
   searchParams,
-  params: { locale },
+  params: { locale, quizSlug },
 }: {
-  searchParams: { attemptId?: string };
-  params: { locale: string };
+  searchParams: { attemptId?: string; unlocked?: string; payment?: string };
+  params: { locale: string; quizSlug: string };
 }) {
   const attemptId = searchParams.attemptId;
+  const isUnlocked = searchParams.unlocked === 'true' || searchParams.payment === 'success';
   let summary = null;
 
   const baseUrl = process.env.NEXTAUTH_URL
@@ -71,21 +63,6 @@ export default async function SummaryPage({
       <div className="flex-1 flex flex-col items-center px-5 pt-4 pb-8 overflow-y-auto no-scrollbar z-10">
         {/* Checkmark Illustration */}
         <div className="relative mb-6 flex items-center justify-center">
-          {/* Outer floating shapes */}
-          <div className="absolute top-0 left-[-20px] text-yellow-500 dark:text-yellow-400 text-lg animate-pulse">
-            ✦
-          </div>
-          <div className="absolute bottom-4 right-[-16px] text-purple-500 dark:text-purple-400 text-sm">
-            ✦
-          </div>
-          <div className="absolute top-8 right-[-10px] text-emerald-500 dark:text-emerald-400 text-xs">
-            ●
-          </div>
-          <div className="absolute bottom-2 left-[-12px] text-blue-500 dark:text-blue-400 text-xs">
-            ■
-          </div>
-
-          {/* Centered Check Circle with Glow */}
           <div className="w-24 h-24 rounded-full bg-white dark:bg-[#121722] border border-gray-100 dark:border-white/[0.08] flex items-center justify-center shadow-[0_8px_32px_rgba(79,125,255,0.08)] dark:shadow-[0_8px_32px_rgba(79,125,255,0.15)] relative">
             <div className="absolute inset-2 rounded-full bg-gradient-to-tr from-[#4F7DFF]/20 to-transparent blur-sm" />
             <div className="w-14 h-14 rounded-full bg-[#4F7DFF] flex items-center justify-center shadow-lg shadow-[#4F7DFF]/30 relative z-10">
@@ -104,59 +81,82 @@ export default async function SummaryPage({
 
         {/* Text Headers */}
         <h1 className="text-3xl font-black text-slate-900 dark:text-white mb-2 text-center leading-tight">
-          Awesome Job!
+          {isUnlocked ? 'Full Results Unlocked!' : 'Awesome Job!'}
         </h1>
         <p className="text-gray-500 dark:text-[#C8D1E1] text-xs text-center mb-8 max-w-[280px] leading-relaxed">
-          You completed all {summary.totalQuestions} questions. You&apos;ve earned a base score of:
+          {isUnlocked
+            ? `You completed all ${summary.totalQuestions} questions with detailed step-by-step breakdown & official certificate:`
+            : `You completed all ${summary.totalQuestions} questions. Unlock full answers & certificate for $1:`}
         </p>
 
         {/* Score Block */}
-        <div className="text-center mb-8">
-          <p className="text-7xl font-black text-[#4F7DFF] tracking-tighter drop-shadow-[0_4px_12px_rgba(79,125,255,0.1)]">
+        <div className="text-center mb-4">
+          <p className="text-6xl font-black text-[#4F7DFF] tracking-tighter drop-shadow-[0_4px_12px_rgba(79,125,255,0.1)]">
             {basePoints}
           </p>
-          <p className="text-[10px] font-extrabold text-gray-400 dark:text-[#8B93A7] uppercase tracking-widest mt-2">
+          <p className="text-[10px] font-extrabold text-gray-400 dark:text-[#8B93A7] uppercase tracking-widest mt-1">
             Base Points
           </p>
         </div>
 
-        {/* Locked Insights Card */}
-        <div className="w-full bg-gray-50 dark:bg-[#1F2533] border border-gray-100 dark:border-white/[0.06] rounded-[22px] p-5 flex items-center justify-between shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 cursor-pointer mb-8">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#4F7DFF]/10 flex items-center justify-center shrink-0 border border-[#4F7DFF]/15">
-              <Lock className="w-5 h-5 text-[#4F7DFF]" />
+        {/* Unlocked / Locked Insights Card */}
+        {isUnlocked ? (
+          <div className="w-full bg-[#EFF6FF] dark:bg-[#1E293B]/80 border-2 border-[#60A5FA] rounded-xl p-3.5 flex flex-col gap-2.5 mb-3 shadow-md">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#DBEAFE] dark:bg-[#3B82F6]/20 text-[#2563EB] dark:text-[#60A5FA] flex items-center justify-center shrink-0 border border-[#93C5FD]">
+                <ShieldCheck className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 dark:text-white">
+                  Full Results & Explanations Unlocked
+                </h4>
+                <p className="text-[11px] text-[#2563EB] dark:text-[#60A5FA] font-semibold">
+                  Verified Pass • Certificate ID: HRL-{Date.now().toString().slice(-6)}
+                </p>
+              </div>
             </div>
-            <div className="flex flex-col text-left">
-              <h4 className="font-bold text-slate-900 dark:text-white text-sm mb-0.5">
-                Unlock Insights
-              </h4>
-              <p className="text-[11px] text-gray-500 dark:text-[#8B93A7] max-w-[190px] leading-snug">
-                See your detailed strengths and weaknesses with personalized recommendations.
-              </p>
+            <Link
+              href={`/${locale}/quiz/${quizSlug}/results`}
+              className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg font-bold text-xs shadow-md text-center transition-all active:scale-[0.98]"
+            >
+              View Full Detailed Results & Answers
+            </Link>
+          </div>
+        ) : (
+          <div className="w-full bg-white dark:bg-[#1E293B] border border-blue-100 dark:border-white/10 rounded-xl p-3.5 flex items-center justify-between shadow-sm mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#EFF6FF] dark:bg-[#3B82F6]/20 flex items-center justify-center shrink-0 border border-[#BFDBFE]">
+                <Lock className="w-4.5 h-4.5 text-[#2563EB] dark:text-[#60A5FA]" />
+              </div>
+              <div className="flex flex-col text-left">
+                <h4 className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm mb-0.5">
+                  Unlock Detailed Answers ($1.00)
+                </h4>
+                <p className="text-[11px] text-gray-500 dark:text-[#94A3B8] max-w-[200px] leading-snug">
+                  See question explanations, correct answers & full score breakdown.
+                </p>
+              </div>
             </div>
           </div>
-          <ChevronRight className="w-5 h-5 text-gray-400 dark:text-[#8B93A7] shrink-0" />
-        </div>
+        )}
 
         {/* Secure Text Info */}
-        <div className="flex items-center justify-center gap-1.5 mb-4 text-[11px] font-semibold text-gray-500 dark:text-[#8B93A7]">
-          <ShieldCheck className="w-4 h-4 text-[#22C55E]" />
-          Secure one-time payment via Stripe
+        <div className="flex items-center justify-center gap-1.5 mb-2.5 text-[11px] font-semibold text-[#2563EB] dark:text-[#60A5FA]">
+          <ShieldCheck className="w-4 h-4 text-[#2563EB] dark:text-[#60A5FA]" />
+          Secure $1.00 payment via Stripe Gateway
         </div>
 
         {/* Action Buttons */}
         <div className="w-full flex flex-col gap-3">
-          <button className="w-full bg-[#4F7DFF] hover:bg-[#4F7DFF]/90 text-white font-bold text-sm py-4 rounded-[18px] shadow-lg shadow-[#4F7DFF]/25 flex items-center justify-center gap-2 active:scale-98 transition-all">
-            <Lock className="w-4 h-4" />
-            Unlock Full Results • $1
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </button>
+          {!isUnlocked && (
+            <UnlockButton attemptId={attemptId} quizSlug={quizSlug} locale={locale} />
+          )}
 
           <Link
             href={`/${locale}`}
             className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-[#1F2533]/40 dark:hover:bg-[#1F2533]/80 border border-gray-200 dark:border-white/[0.08] text-gray-700 dark:text-white font-bold text-sm py-4 rounded-[18px] flex items-center justify-center transition-all"
           >
-            Skip for now
+            {isUnlocked ? 'Return to Home' : 'Skip for now'}
           </Link>
         </div>
       </div>

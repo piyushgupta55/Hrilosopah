@@ -94,8 +94,8 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
             </div>
 
             <div className="flex items-center p-3 border border-[#F3F4F6] rounded-[16px] shadow-sm bg-white">
-              <div className="w-10 h-10 rounded-[10px] bg-[#F5F3FF] flex items-center justify-center mr-3">
-                <Bitcoin className="w-6 h-6 text-[#8B5CF6]" />
+              <div className="w-10 h-10 rounded-[10px] bg-[#E0F2FE] flex items-center justify-center mr-3">
+                <Bitcoin className="w-6 h-6 text-[#3B82F6]" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-[14px] text-[#111827]">{t('cryptoFundamentals')}</h4>

@@ -1,7 +1,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
-import { Bell, ChevronRight, Check, Flame, Hexagon, Brain } from 'lucide-react';
+import { StreakCard } from '@/components/home/StreakCard';
+import { Bell, ChevronRight, Check, Flame, Hexagon, Brain, Bitcoin } from 'lucide-react';
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 
@@ -67,40 +68,14 @@ export default async function HomePage({ params: { locale } }: { params: { local
 
       {/* Streak Card */}
       <div className="px-5 w-full mb-8">
-        <div className="w-full bg-gradient-to-r from-[#4F46E5] to-[#3B82F6] rounded-xl p-5 text-white shadow-lg shadow-blue-500/20 relative overflow-hidden">
-          <div className="flex justify-between items-start mb-6 relative z-10">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Flame className="w-4 h-4 text-orange-400 fill-orange-400" />
-                <h3 className="font-semibold text-lg">{t('streakDays', { days: 7 })}</h3>
-              </div>
-              <p className="text-blue-100 text-sm">{t('keepItUp')}</p>
-            </div>
-            {/* Hexagon for streak count */}
-            <div className="relative flex items-center justify-center">
-              <Hexagon
-                className="w-[3.25rem] h-[3.25rem] text-white/40 fill-white/10"
-                strokeWidth={1.5}
-              />
-              <span className="absolute text-2xl font-bold text-white">7</span>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center relative z-10 px-1">
-            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center shadow-sm">
-                  <Check className="w-3.5 h-3.5 text-blue-600 stroke-[3]" />
-                </div>
-                <span className="text-[10px] text-blue-100 font-medium">{day}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Decorative elements */}
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-blue-400/20 rounded-full blur-xl"></div>
-        </div>
+        <StreakCard
+          streakDays={7}
+          locale={locale}
+          labels={{
+            streakDays: t('streakDays', { days: 7 }),
+            keepItUp: t('keepItUp'),
+          }}
+        />
       </div>
 
       {/* Continue Learning */}
@@ -172,11 +147,11 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 <span className="px-2.5 py-1 bg-[#ECFDF5] dark:bg-[#22C55E]/20 text-[#059669] dark:text-[#22C55E] text-[10px] font-bold rounded-full uppercase tracking-wider">
                   {tExplore('newLabel')}
                 </span>
-                <span className="text-[#3B82F6] dark:text-[#4F7DFF] text-lg font-bold">₿</span>
+                <Bitcoin className="w-5 h-5 text-blue-600 dark:text-[#4F7DFF]" strokeWidth={1.8} />
               </div>
 
-              <div className="w-16 h-16 rounded-full bg-[#E0F2FE] dark:bg-[#4F7DFF]/15 flex items-center justify-center mb-4 mt-2 relative z-10 text-3xl text-[#3B82F6] dark:text-[#4F7DFF] font-bold">
-                ₿
+              <div className="w-16 h-16 rounded-full bg-[#E0F2FE] dark:bg-[#4F7DFF]/15 flex items-center justify-center mb-4 mt-2 relative z-10">
+                <Bitcoin className="w-8 h-8 text-blue-600 dark:text-[#4F7DFF]" strokeWidth={1.5} />
               </div>
 
               <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1 relative z-10">

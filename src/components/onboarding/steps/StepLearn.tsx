@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
-import { Brain, Coins, FileQuestion } from 'lucide-react';
+import { Brain, Bitcoin, FileQuestion } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface StepLearnProps {
@@ -28,8 +28,8 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
       id: 'crypto',
       title: t('cryptoTitle'),
       desc: t('cryptoDesc'),
-      icon: <Coins className="w-8 h-8 text-[#8B5CF6]" />,
-      bg: 'bg-[#F5F3FF]',
+      icon: <Bitcoin className="w-8 h-8 text-[#3B82F6]" />,
+      bg: 'bg-[#E0F2FE]',
     },
     {
       id: 'tech',
@@ -53,9 +53,10 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col justify-between pb-6 h-full"
+      className="flex-1 flex flex-col h-full overflow-hidden"
     >
-      <div>
+      {/* Fixed Header */}
+      <div className="shrink-0 mb-1">
         <StepHeader
           title={
             <>
@@ -65,8 +66,11 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
           }
           subtitle={t('learnSubtitle')}
         />
+      </div>
 
-        <div className="flex flex-col space-y-4">
+      {/* Middle Scrollable Area */}
+      <div className="flex-1 overflow-y-auto no-scrollbar py-1 min-h-0">
+        <div className="flex flex-col space-y-3 pb-2">
           {cards.map((card, i) => {
             const isSelected = selectedInterests.includes(card.id);
             return (
@@ -74,22 +78,22 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.1 }}
+                transition={{ delay: i * 0.08 }}
                 onClick={() => toggleInterest(card.id)}
-                className={`flex items-center p-4 border rounded-[16px] shadow-sm cursor-pointer transition-all ${
+                className={`flex items-center p-3.5 border rounded-[16px] shadow-sm cursor-pointer transition-all ${
                   isSelected
                     ? 'border-[#0052FF] bg-[#F0F5FF]/80 ring-2 ring-[#0052FF]/10'
                     : 'bg-white border-[#E5E7EB] hover:border-gray-300'
                 }`}
               >
                 <div
-                  className={`w-14 h-14 rounded-[12px] ${card.bg} flex items-center justify-center mr-4 shrink-0`}
+                  className={`w-12 h-12 rounded-[12px] ${card.bg} flex items-center justify-center mr-3.5 shrink-0`}
                 >
                   {card.icon}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-[#111827] font-bold text-[16px] mb-1">{card.title}</h3>
-                  <p className="text-[#6B7280] text-[13px] leading-snug">{card.desc}</p>
+                  <h3 className="text-[#111827] font-bold text-[15px] mb-0.5">{card.title}</h3>
+                  <p className="text-[#6B7280] text-[12px] leading-snug">{card.desc}</p>
                 </div>
                 <div className="ml-2 shrink-0">
                   <div
@@ -116,7 +120,8 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
         </div>
       </div>
 
-      <div className="w-full mt-8">
+      {/* Fixed Footer */}
+      <div className="shrink-0 pt-3 pb-2 bg-white border-t border-gray-100/80 z-10 mt-auto">
         <PrimaryButton label={t('continue')} onClick={onNext} />
       </div>
     </motion.div>

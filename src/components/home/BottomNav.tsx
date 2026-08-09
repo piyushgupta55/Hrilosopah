@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
-import { Home, Compass, Gamepad2, BarChart2, User } from 'lucide-react';
+import { Home, Brain, BarChart2, User } from 'lucide-react';
 
 export const BottomNav = () => {
   const pathname = usePathname() || '';
@@ -14,15 +14,9 @@ export const BottomNav = () => {
   const navItems = [
     { name: t('forYou'), href: '/', icon: Home, activeRegex: new RegExp(`^(\/${locale})?$`) },
     {
-      name: t('explore'),
-      href: '/explore',
-      icon: Compass,
-      activeRegex: new RegExp(`\/${locale}\/explore$|\/explore$`),
-    },
-    {
       name: t('play'),
       href: '/play',
-      icon: Gamepad2,
+      icon: Brain,
       activeRegex: new RegExp(`\/${locale}\/play$|\/play$`),
     },
     {

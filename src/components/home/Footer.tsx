@@ -58,15 +58,15 @@ export const Footer = () => {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/terms"
+                  href="/en/settings/about"
                   className="text-text-secondary hover:text-primary transition-colors"
                 >
-                  Terms of Service
+                  About Us
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="/en/settings/privacy"
                   className="text-text-secondary hover:text-primary transition-colors"
                 >
                   Privacy Policy
@@ -74,7 +74,7 @@ export const Footer = () => {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="/en/settings/contact"
                   className="text-text-secondary hover:text-primary transition-colors"
                 >
                   Contact Us

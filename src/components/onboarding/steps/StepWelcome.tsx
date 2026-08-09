@@ -57,18 +57,18 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
             <motion.div
               animate={{ y: [0, -8, 0] }}
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-              className="absolute left-[10%] bottom-[20%] w-14 h-14 bg-white border-[3px] border-[#22C55E] rounded-full shadow-lg z-20 flex items-center justify-center text-[#22C55E]"
+              className="absolute left-[8%] bottom-[18%] w-14 h-14 bg-gradient-to-tr from-[#F7931A] to-[#FFAB40] rounded-full shadow-lg shadow-[#F7931A]/30 border-2 border-white z-20 flex items-center justify-center text-white"
             >
-              <Bitcoin className="w-8 h-8 text-[#22C55E] fill-[#22C55E]/10" />
+              <Bitcoin className="w-8 h-8 text-white" strokeWidth={2} />
             </motion.div>
 
             {/* Floating Brain */}
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-              className="absolute right-[5%] top-[15%] w-16 h-16 text-[#8B5CF6] z-20 flex items-center justify-center filter drop-shadow-lg"
+              className="absolute right-[5%] top-[12%] w-14 h-14 bg-gradient-to-tr from-[#8B5CF6] to-[#A78BFA] rounded-full shadow-lg shadow-[#8B5CF6]/30 border-2 border-white z-20 flex items-center justify-center text-white"
             >
-              <Brain className="w-16 h-16" strokeWidth={1.5} />
+              <Brain className="w-8 h-8 text-white" strokeWidth={1.8} />
             </motion.div>
 
             {/* Decorative symbols */}

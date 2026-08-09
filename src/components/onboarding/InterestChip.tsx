@@ -17,7 +17,7 @@ export const InterestChip = ({ label, icon, selected, onClick }: InterestChipPro
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className={`relative w-full aspect-square flex flex-col items-center justify-center rounded-[16px] border-[2px] transition-all ${
+      className={`relative w-full h-[94px] sm:h-auto sm:aspect-square flex flex-col items-center justify-center p-2 rounded-[16px] border-[2px] transition-all ${
         selected
           ? 'border-[#0052FF] bg-blue-50/30'
           : 'border-[#F3F4F6] bg-white hover:border-[#E5E7EB]'
