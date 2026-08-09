@@ -4,6 +4,8 @@ import { Shield, HelpCircle, BookOpen, Users, CreditCard, TrendingUp } from 'luc
 import { prisma } from '@/lib/prisma';
 import { AdminSignOutButton } from '@/components/admin/AdminSignOutButton';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage({
   params: { locale },
 }: {

@@ -2,6 +2,8 @@ import React from 'react';
 import { prisma } from '@/lib/prisma';
 import { AdminQuizzesClient, QuizItem } from '@/components/admin/AdminQuizzesClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminQuizzesPage({
   params: { locale },
 }: {
