@@ -4,7 +4,16 @@ import { prisma } from '@/lib/prisma';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { text, options, correctOptionIndex, difficulty, category, explanation, quizSlug } = body;
+    const {
+      text,
+      options,
+      correctOptionIndex,
+      difficulty,
+      category,
+      explanation,
+      quizId,
+      quizSlug,
+    } = body;
 
     if (!text || !options || correctOptionIndex === undefined) {
       return NextResponse.json(
@@ -13,30 +22,36 @@ export async function POST(req: Request) {
       );
     }
 
-    const quizCategory = category || 'AI';
-    const targetSlug =
-      quizSlug || (quizCategory === 'Crypto' ? 'crypto-fundamentals' : 'ai-awareness');
+    let targetQuizId = quizId;
 
-    // Find or create quiz matching category
-    let quiz = await prisma.quiz.findFirst({
-      where: { slug: targetSlug },
-    });
+    if (!targetQuizId && quizSlug) {
+      const q = await prisma.quiz.findFirst({ where: { slug: quizSlug } });
+      if (q) targetQuizId = q.id;
+    }
 
-    if (!quiz) {
-      quiz = await prisma.quiz.create({
-        data: {
-          slug: targetSlug,
-          category: quizCategory,
-          isActive: true,
-        },
-      });
+    if (!targetQuizId) {
+      const quizCategory = category || 'AI';
+      const targetSlug =
+        quizSlug ||
+        (quizCategory.toLowerCase() === 'crypto' ? 'crypto-blockchain' : 'ai-awareness');
+      let quiz = await prisma.quiz.findFirst({ where: { slug: targetSlug } });
+      if (!quiz) {
+        quiz = await prisma.quiz.create({
+          data: {
+            slug: targetSlug,
+            category: quizCategory,
+            isActive: true,
+          },
+        });
+      }
+      targetQuizId = quiz.id;
     }
 
     const optionsStr = typeof options === 'string' ? options : JSON.stringify(options);
 
     const newQuestion = await prisma.question.create({
       data: {
-        quizId: quiz.id,
+        quizId: targetQuizId,
         text: text.trim(),
         options: optionsStr,
         correctOptionIndex: Number(correctOptionIndex),
@@ -58,7 +73,8 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, text, options, correctOptionIndex, difficulty, category, explanation } = body;
+    const { id, text, options, correctOptionIndex, difficulty, category, explanation, quizId } =
+      body;
 
     if (!id || !text) {
       return NextResponse.json(
@@ -68,19 +84,6 @@ export async function PUT(req: Request) {
     }
 
     const optionsStr = typeof options === 'string' ? options : JSON.stringify(options);
-
-    // If category changed, find or assign to appropriate quiz category
-    let quizId: string | undefined = undefined;
-    if (category) {
-      const targetSlug = category === 'Crypto' ? 'crypto-fundamentals' : 'ai-awareness';
-      let quiz = await prisma.quiz.findFirst({ where: { slug: targetSlug } });
-      if (!quiz) {
-        quiz = await prisma.quiz.create({
-          data: { slug: targetSlug, category, isActive: true },
-        });
-      }
-      quizId = quiz.id;
-    }
 
     const updatedQuestion = await prisma.question.update({
       where: { id },
