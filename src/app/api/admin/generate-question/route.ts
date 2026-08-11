@@ -33,17 +33,29 @@ export async function POST(req: Request) {
         ? topic.trim()
         : topicsForCat[Math.floor(Math.random() * topicsForCat.length)];
 
-    // If an OpenAI API Key is present, attempt live OpenAI API call
-    if (key && key.startsWith('sk-')) {
+    const effectiveKey =
+      apiKey ||
+      process.env.AI_GATEWAY_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      process.env.GEMINI_API_KEY;
+
+    // If an AI API Key (OpenAI sk- or Vercel AI Gateway vck_) is present, call live AI Gateway endpoint
+    if (effectiveKey && effectiveKey.trim().length > 0) {
       try {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        const isVercelGateway = effectiveKey.startsWith('vck_');
+        const endpoint = isVercelGateway
+          ? 'https://ai-gateway.vercel.sh/v1/chat/completions'
+          : 'https://api.openai.com/v1/chat/completions';
+        const model = isVercelGateway ? 'openai/gpt-4o-mini' : 'gpt-4o-mini';
+
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${key}`,
+            Authorization: `Bearer ${effectiveKey.trim()}`,
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model,
             messages: [
               {
                 role: 'system',
@@ -52,7 +64,7 @@ export async function POST(req: Request) {
               },
               {
                 role: 'user',
-                content: `Generate a high-quality ${difficulty} ${category} quiz question specifically about ${selectedTopic}. Return valid JSON only.`,
+                content: `Generate a high-quality ${difficulty} level ${category} quiz question specifically about ${selectedTopic}. Return valid JSON object with keys: "text", "options", "correctOptionIndex", "difficulty", "explanation".`,
               },
             ],
             response_format: { type: 'json_object' },
@@ -62,14 +74,26 @@ export async function POST(req: Request) {
 
         if (response.ok) {
           const data = await response.json();
-          const aiContent = JSON.parse(data.choices[0].message.content);
-          return NextResponse.json({
-            success: true,
-            question: { ...aiContent, category, difficulty },
-          });
+          let rawContent = data.choices?.[0]?.message?.content;
+          if (rawContent) {
+            if (rawContent.startsWith('```')) {
+              rawContent = rawContent
+                .replace(/^```(json)?/, '')
+                .replace(/```$/, '')
+                .trim();
+            }
+            const aiContent = JSON.parse(rawContent);
+            return NextResponse.json({
+              success: true,
+              question: { ...aiContent, category, difficulty },
+            });
+          }
+        } else {
+          const errBody = await response.text();
+          console.error('AI Gateway API error:', response.status, errBody);
         }
       } catch (e) {
-        console.warn('OpenAI API fetch error, using built-in AI engine fallback:', e);
+        console.warn('AI Gateway API fetch error, using built-in AI engine fallback:', e);
       }
     }
 
