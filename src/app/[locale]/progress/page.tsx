@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { BottomNav } from '@/components/home/BottomNav';
@@ -14,76 +14,70 @@ import {
   ArrowRight,
   CheckCircle2,
   TrendingUp,
+  FileQuestion,
 } from 'lucide-react';
+
+interface QuizAttemptProgress {
+  id: string;
+  title: string;
+  category: string;
+  date: string;
+  timeSpent: string;
+  score: string;
+  questionsCorrect: number;
+  totalQuestions: number;
+  points: number;
+  slug: string;
+}
+
+interface UserStatsData {
+  completedCount: number;
+  streakDays: number;
+  timeSpentFormatted: string;
+  accuracyPercentage: number;
+  totalQuestionsCorrect: number;
+  totalQuestionsAttempted: number;
+  totalPoints: number;
+  completedQuizzes: QuizAttemptProgress[];
+}
 
 export default function ProgressPage() {
   const params = useParams() || {};
   const locale = (params.locale as string) || 'en';
 
   const [activeTab, setActiveTab] = useState<'all' | 'ai' | 'crypto'>('all');
+  const [stats, setStats] = useState<UserStatsData>({
+    completedCount: 0,
+    streakDays: 0,
+    timeSpentFormatted: '0m',
+    accuracyPercentage: 0,
+    totalQuestionsCorrect: 0,
+    totalQuestionsAttempted: 0,
+    totalPoints: 0,
+    completedQuizzes: [],
+  });
+  const [loading, setLoading] = useState(true);
 
-  const completedQuizzes = [
-    {
-      id: 'ai-awareness',
-      title: 'AI Awareness & LLM Architecture',
-      category: 'AI',
-      icon: Brain,
-      iconBg: 'bg-purple-50 text-purple-600 border border-purple-200',
-      date: 'Aug 10, 2026',
-      timeSpent: '4m 12s',
-      score: '100%',
-      questionsCorrect: 15,
-      totalQuestions: 15,
-      points: 1500,
-      slug: 'ai-awareness',
-    },
-    {
-      id: 'crypto-fundamentals',
-      title: 'Crypto Fundamentals & Bitcoin',
-      category: 'Crypto',
-      icon: Bitcoin,
-      iconBg: 'bg-amber-50 text-amber-600 border border-amber-200',
-      date: 'Aug 09, 2026',
-      timeSpent: '5m 45s',
-      score: '93%',
-      questionsCorrect: 14,
-      totalQuestions: 15,
-      points: 1400,
-      slug: 'crypto-fundamentals',
-    },
-    {
-      id: 'blockchain-architecture',
-      title: 'Blockchain Consensus & Smart Contracts',
-      category: 'Crypto',
-      icon: Bitcoin,
-      iconBg: 'bg-blue-50 text-blue-600 border border-blue-200',
-      date: 'Aug 08, 2026',
-      timeSpent: '6m 10s',
-      score: '87%',
-      questionsCorrect: 13,
-      totalQuestions: 15,
-      points: 1300,
-      slug: 'blockchain-architecture',
-    },
-    {
-      id: 'machine-learning-basics',
-      title: 'Machine Learning & Neural Networks',
-      category: 'AI',
-      icon: Brain,
-      iconBg: 'bg-[#EFF6FF] text-[#2563EB] border border-blue-200',
-      date: 'Aug 07, 2026',
-      timeSpent: '3m 50s',
-      score: '80%',
-      questionsCorrect: 12,
-      totalQuestions: 15,
-      points: 1200,
-      slug: 'machine-learning-basics',
-    },
-  ];
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        const res = await fetch('/api/user/stats');
+        const json = await res.json();
+        if (json.success && json.data) {
+          setStats(json.data);
+        }
+      } catch (err) {
+        console.error('Error fetching user stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, []);
 
-  const filteredQuizzes = completedQuizzes.filter((q) => {
-    if (activeTab === 'ai') return q.category === 'AI';
-    if (activeTab === 'crypto') return q.category === 'Crypto';
+  const filteredQuizzes = stats.completedQuizzes.filter((q) => {
+    if (activeTab === 'ai') return q.category.toUpperCase() === 'AI';
+    if (activeTab === 'crypto') return q.category.toUpperCase() === 'CRYPTO';
     return true;
   });
 
@@ -104,7 +98,9 @@ export default function ProgressPage() {
         </div>
         <div className="flex items-center gap-1.5 bg-white border border-blue-200 px-3 py-1.5 rounded-full shadow-sm">
           <Zap className="w-4 h-4 text-[#2563EB]" />
-          <span className="text-xs font-black text-[#2563EB]">1,500 XP</span>
+          <span className="text-xs font-black text-[#2563EB]">
+            {stats.totalPoints.toLocaleString()} XP
+          </span>
         </div>
       </div>
 
@@ -117,7 +113,7 @@ export default function ProgressPage() {
               Overall Quiz Performance
             </h3>
             <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-              Top 5% Learner
+              {stats.completedCount > 0 ? 'Active Learner' : 'New Learner'}
             </span>
           </div>
 
@@ -134,12 +130,14 @@ export default function ProgressPage() {
                   strokeWidth="10"
                   fill="none"
                   strokeDasharray="251.2"
-                  strokeDashoffset={251.2 * (1 - 0.9)}
+                  strokeDashoffset={251.2 * (1 - (stats.accuracyPercentage / 100))}
                   strokeLinecap="round"
                 />
               </svg>
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <span className="text-lg font-black text-slate-900 leading-none">90%</span>
+                <span className="text-lg font-black text-slate-900 leading-none">
+                  {stats.accuracyPercentage}%
+                </span>
                 <span className="text-[9px] text-slate-400 font-bold mt-0.5">Accuracy</span>
               </div>
             </div>
@@ -150,25 +148,33 @@ export default function ProgressPage() {
                 <span className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">
                   Quizzes
                 </span>
-                <span className="text-xs font-black text-slate-900">4 Completed</span>
+                <span className="text-xs font-black text-slate-900">
+                  {stats.completedCount} Completed
+                </span>
               </div>
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">
                   Accuracy
                 </span>
-                <span className="text-xs font-black text-[#2563EB]">54/60 Correct</span>
+                <span className="text-xs font-black text-[#2563EB]">
+                  {stats.totalQuestionsCorrect}/{stats.totalQuestionsAttempted} Correct
+                </span>
               </div>
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">
                   Streak
                 </span>
-                <span className="text-xs font-black text-slate-900">7 Days 🔥</span>
+                <span className="text-xs font-black text-slate-900">
+                  {stats.streakDays} {stats.streakDays === 1 ? 'Day' : 'Days'} 🔥
+                </span>
               </div>
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-[9px] font-bold text-slate-400 uppercase block mb-0.5">
                   Time Spent
                 </span>
-                <span className="text-xs font-black text-slate-900">19m 57s</span>
+                <span className="text-xs font-black text-slate-900">
+                  {stats.timeSpentFormatted}
+                </span>
               </div>
             </div>
           </div>
@@ -223,100 +229,88 @@ export default function ProgressPage() {
         </div>
 
         {/* Quiz Cards */}
-        <div className="space-y-2.5">
-          {filteredQuizzes.map((quiz) => {
-            const Icon = quiz.icon;
-            return (
-              <div
-                key={quiz.id}
-                className="bg-white border border-blue-100 rounded-xl p-3.5 shadow-sm hover:shadow-md transition-all"
-              >
-                <div className="flex items-center justify-between gap-3 mb-2.5">
-                  <div className="flex items-center gap-3">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${quiz.iconBg}`}
-                    >
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug">
-                        {quiz.title}
-                      </h4>
-                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400 font-medium">
-                        <span>{quiz.date}</span>
-                        <span>•</span>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 text-slate-400" />
-                          {quiz.timeSpent}
-                        </span>
+        {loading ? (
+          <div className="text-center py-8 text-xs text-slate-400 font-medium">Loading stats...</div>
+        ) : filteredQuizzes.length === 0 ? (
+          <div className="bg-white border border-blue-100 rounded-xl p-8 text-center shadow-sm">
+            <FileQuestion className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+            <h4 className="font-bold text-sm text-slate-900 mb-1">No completed tests yet</h4>
+            <p className="text-xs text-slate-400 mb-4 max-w-xs mx-auto">
+              Take your first quiz to track your accuracy, earn XP, and view detailed answer analytics!
+            </p>
+            <Link
+              href={`/${locale}/play`}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-md hover:bg-[#1D4ED8] transition-all"
+            >
+              Start a Quiz
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {filteredQuizzes.map((quiz) => {
+              const Icon = quiz.category === 'AI' ? Brain : Bitcoin;
+              const iconBg =
+                quiz.category === 'AI'
+                  ? 'bg-purple-50 text-purple-600 border border-purple-200'
+                  : 'bg-amber-50 text-amber-600 border border-amber-200';
+
+              return (
+                <div
+                  key={quiz.id}
+                  className="bg-white border border-blue-100 rounded-xl p-3.5 shadow-sm hover:shadow-md transition-all"
+                >
+                  <div className="flex items-center justify-between gap-3 mb-2.5">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${iconBg}`}
+                      >
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-xs sm:text-sm text-slate-900 leading-snug">
+                          {quiz.title}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-slate-400 font-medium">
+                          <span>{quiz.date}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-slate-400" />
+                            {quiz.timeSpent}
+                          </span>
+                        </div>
                       </div>
                     </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="text-base font-black text-[#2563EB] leading-none block">
+                        {quiz.score}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
+                        {quiz.questionsCorrect}/{quiz.totalQuestions} Correct
+                      </span>
+                    </div>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <span className="text-base font-black text-[#2563EB] leading-none block">
-                      {quiz.score}
+                  {/* Card Footer Bar */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
+                    <span className="px-2.5 py-0.5 bg-blue-50 text-[#2563EB] text-[10px] font-bold rounded-full border border-blue-100">
+                      +{quiz.points} XP
                     </span>
-                    <span className="text-[10px] text-slate-400 font-semibold block mt-0.5">
-                      {quiz.questionsCorrect}/{quiz.totalQuestions} Correct
-                    </span>
+
+                    <Link
+                      href={`/${locale}/quiz/${quiz.slug}/results`}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-[11px] rounded-lg shadow-sm transition-all active:scale-[0.98]"
+                    >
+                      <span>View Analytics</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
                   </div>
                 </div>
-
-                {/* Card Footer Bar */}
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100 text-xs">
-                  <span className="px-2.5 py-0.5 bg-blue-50 text-[#2563EB] text-[10px] font-bold rounded-full border border-blue-100">
-                    +{quiz.points} XP
-                  </span>
-
-                  <Link
-                    href={`/${locale}/quiz/${quiz.slug}/results`}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold text-[11px] rounded-lg shadow-sm transition-all active:scale-[0.98]"
-                  >
-                    <span>View Analytics</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Topic Mastery Breakdown */}
-      <div className="px-5 w-full mb-6">
-        <h3 className="font-extrabold text-slate-900 text-sm sm:text-base mb-2.5">
-          Topic Mastery Breakdown
-        </h3>
-        <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100 flex flex-col gap-3 text-xs">
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between font-bold">
-              <div className="flex items-center gap-2">
-                <Brain className="w-4 h-4 text-[#2563EB]" />
-                <span className="text-slate-900">Artificial Intelligence & LLMs</span>
-              </div>
-              <span className="text-[#2563EB] font-black">90%</span>
-            </div>
-            <div className="w-full h-2 bg-blue-50 rounded-full overflow-hidden">
-              <div className="h-full bg-[#2563EB] rounded-full" style={{ width: '90%' }}></div>
-            </div>
+              );
+            })}
           </div>
-
-          <div className="w-full h-[1px] bg-gray-100"></div>
-
-          <div className="flex flex-col gap-1.5">
-            <div className="flex items-center justify-between font-bold">
-              <div className="flex items-center gap-2">
-                <Bitcoin className="w-4 h-4 text-[#2563EB]" />
-                <span className="text-slate-900">Blockchain & Cryptography</span>
-              </div>
-              <span className="text-[#2563EB] font-black">87%</span>
-            </div>
-            <div className="w-full h-2 bg-blue-50 rounded-full overflow-hidden">
-              <div className="h-full bg-[#2563EB] rounded-full" style={{ width: '87%' }}></div>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       <BottomNav />

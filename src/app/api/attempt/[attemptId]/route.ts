@@ -49,6 +49,12 @@ export async function PATCH(request: Request, { params }: { params: { attemptId:
     const { calculateScore } = await import('@/lib/scoring');
     const { score } = calculateScore(questions, answers);
 
+    // Fetch session if present
+    const { getServerSession } = await import('next-auth/next');
+    const { authOptions } = await import('@/lib/auth');
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email || null;
+
     // Update attempt
     await prisma.attempt.update({
       where: { id: attemptId },
@@ -56,6 +62,7 @@ export async function PATCH(request: Request, { params }: { params: { attemptId:
         score,
         totalQuestions: questionIds.length,
         completedAt: new Date(),
+        ...(attempt.email ? {} : userEmail ? { email: userEmail } : {}),
       },
     });
 

@@ -2,12 +2,57 @@ import React from 'react';
 import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
 import { Zap, Clock, HelpCircle, Gift, Brain, Bot, Bitcoin } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
+import { prisma } from '@/lib/prisma';
 
-export default function PlayPage({ params: { locale } }: { params: { locale: string } }) {
-  const t = useTranslations('Play');
-  const tHome = useTranslations('Home');
-  const tCards = useTranslations('Cards');
+export default async function PlayPage({ params: { locale } }: { params: { locale: string } }) {
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email || '';
+
+  const userAttempts = userEmail
+    ? await prisma.attempt.findMany({
+        where: {
+          email: userEmail,
+          completedAt: { not: null },
+        },
+        include: {
+          quiz: true,
+        },
+      })
+    : [];
+
+  const completedTodayCount = userAttempts.filter((a) => {
+    if (!a.completedAt) return false;
+    const d = new Date(a.completedAt);
+    const today = new Date();
+    return (
+      d.getFullYear() === today.getFullYear() &&
+      d.getMonth() === today.getMonth() &&
+      d.getDate() === today.getDate()
+    );
+  }).length;
+
+  const getQuizProgress = (slug: string) => {
+    const attemptsForQuiz = userAttempts.filter((a) => a.quiz?.slug === slug);
+    if (attemptsForQuiz.length === 0) return { score: 0, total: 15, pct: 0 };
+    const bestAttempt = attemptsForQuiz.reduce((max, curr) =>
+      (curr.score || 0) > (max.score || 0) ? curr : max
+    );
+    const score = bestAttempt.score || 0;
+    const total = bestAttempt.totalQuestions || 15;
+    const pct = Math.round((score / total) * 100);
+    return { score, total, pct };
+  };
+
+  const aiProgress = getQuizProgress('ai-awareness');
+  const cryptoProgress = getQuizProgress('crypto-basics');
+  const mlProgress = getQuizProgress('ml-fundamentals');
+
+  const t = await getTranslations('Play');
+  const tHome = await getTranslations('Home');
+  const tCards = await getTranslations('Cards');
 
   return (
     <div
@@ -19,7 +64,7 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
         <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Quizzes</h1>
         <div className="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-full shadow-sm border border-gray-100">
           <Zap className="w-4 h-4 text-orange-400 fill-orange-400" />
-          <span className="text-sm font-bold text-gray-900">3/5</span>
+          <span className="text-sm font-bold text-gray-900">{completedTodayCount}/5</span>
         </div>
       </div>
 
@@ -50,10 +95,10 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>8 / 15</span>
+                    <span>{aiProgress.score} / {aiProgress.total}</span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: '53%' }}></div>
+                    <div className="h-full bg-white rounded-full" style={{ width: `${aiProgress.pct}%` }}></div>
                   </div>
                 </div>
               </div>
@@ -73,10 +118,10 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>6 / 15</span>
+                    <span>{cryptoProgress.score} / {cryptoProgress.total}</span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: '40%' }}></div>
+                    <div className="h-full bg-white rounded-full" style={{ width: `${cryptoProgress.pct}%` }}></div>
                   </div>
                 </div>
               </div>
@@ -97,10 +142,10 @@ export default function PlayPage({ params: { locale } }: { params: { locale: str
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>4 / 15</span>
+                    <span>{mlProgress.score} / {mlProgress.total}</span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: '26%' }}></div>
+                    <div className="h-full bg-white rounded-full" style={{ width: `${mlProgress.pct}%` }}></div>
                   </div>
                 </div>
               </div>

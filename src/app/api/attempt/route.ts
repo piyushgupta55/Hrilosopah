@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { createAttemptSchema } from '@/lib/validation/quiz';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import crypto from 'crypto';
 
 export async function POST(request: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email || null;
+
     const body = await request.json();
     const result = createAttemptSchema.safeParse(body);
 
@@ -35,6 +40,7 @@ export async function POST(request: Request) {
       data: {
         quizId,
         sessionId,
+        email: userEmail,
       },
     });
 

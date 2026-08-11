@@ -21,86 +21,98 @@ import {
   Check,
 } from 'lucide-react';
 
+export interface AchievementItem {
+  id: string;
+  title: string;
+  desc: string;
+  iconType: 'Brain' | 'Bitcoin' | 'Flame' | 'Award';
+  bg: string;
+  unlocked: boolean;
+}
+
 interface ProfilePageClientProps {
   locale: string;
   userName: string;
   userEmail: string;
   userAvatarInitial: string;
+  completedCount?: number;
+  streakDays?: number;
+  timeSpentFormatted?: string;
+  achievementsList?: AchievementItem[];
+  initialInterests?: string[];
+  initialDailyTime?: string;
 }
+
+const getAchievementIcon = (iconType: string) => {
+  switch (iconType) {
+    case 'Brain':
+      return Brain;
+    case 'Bitcoin':
+      return Bitcoin;
+    case 'Flame':
+      return Flame;
+    case 'Award':
+    default:
+      return Award;
+  }
+};
 
 export function ProfilePageClient({
   locale,
   userName,
   userEmail,
   userAvatarInitial,
+  completedCount = 0,
+  streakDays = 0,
+  timeSpentFormatted = '0m',
+  achievementsList = [],
+  initialInterests = ['AI', 'Crypto'],
+  initialDailyTime = '15',
 }: ProfilePageClientProps) {
   const [activeModal, setActiveModal] = useState<
     'achievements' | 'saved' | 'topics' | 'goals' | null
   >(null);
-  const [dailyGoal, setDailyGoal] = useState('15');
-  const [favTopics, setFavTopics] = useState<string[]>(['AI', 'Crypto']);
+  const [dailyGoal, setDailyGoal] = useState(initialDailyTime);
+  const [favTopics, setFavTopics] = useState<string[]>(initialInterests);
 
-  const achievementsList = [
+  const defaultAchievements: AchievementItem[] = [
     {
+      id: 'ai-rookie',
       title: 'AI Rookie',
       desc: 'Completed 5 AI Quizzes',
-      icon: Brain,
+      iconType: 'Brain',
       bg: 'bg-purple-100 text-purple-600',
-      unlocked: true,
-    },
-    {
-      title: 'Crypto Novice',
-      desc: 'Completed 5 Crypto Quizzes',
-      icon: Bitcoin,
-      bg: 'bg-amber-100 text-amber-600',
-      unlocked: true,
-    },
-    {
-      title: '7 Day Streak',
-      desc: 'Maintained 7 day streak',
-      icon: Flame,
-      bg: 'bg-orange-100 text-orange-600',
-      unlocked: true,
-    },
-    {
-      title: 'Perfect Score',
-      desc: 'Scored 100% accuracy',
-      icon: Award,
-      bg: 'bg-yellow-100 text-yellow-600',
-      unlocked: true,
-    },
-    {
-      title: 'AI Master',
-      desc: 'Complete 20 AI Quizzes',
-      icon: Brain,
-      bg: 'bg-[#EFF6FF] text-[#2563EB]',
       unlocked: false,
     },
     {
-      title: 'Blockchain Architect',
-      desc: 'Complete 20 Crypto Quizzes',
-      icon: Bitcoin,
-      bg: 'bg-blue-100 text-blue-600',
+      id: 'crypto-novice',
+      title: 'Crypto Novice',
+      desc: 'Completed 5 Crypto Quizzes',
+      iconType: 'Bitcoin',
+      bg: 'bg-amber-100 text-amber-600',
+      unlocked: false,
+    },
+    {
+      id: '7-day-streak',
+      title: '7 Day Streak',
+      desc: 'Maintained 7 day streak',
+      iconType: 'Flame',
+      bg: 'bg-orange-100 text-orange-600',
+      unlocked: false,
+    },
+    {
+      id: 'perfect-score',
+      title: 'Perfect Score',
+      desc: 'Scored 100% accuracy',
+      iconType: 'Award',
+      bg: 'bg-yellow-100 text-yellow-600',
       unlocked: false,
     },
   ];
 
-  const savedQuizzesList = [
-    {
-      title: 'AI Awareness & LLM Architecture',
-      qCount: 15,
-      duration: '5 mins',
-      category: 'AI',
-      slug: 'ai-awareness',
-    },
-    {
-      title: 'Crypto Fundamentals & Bitcoin',
-      qCount: 15,
-      duration: '6 mins',
-      category: 'Crypto',
-      slug: 'crypto-fundamentals',
-    },
-  ];
+  const displayAchievements = achievementsList.length > 0 ? achievementsList : defaultAchievements;
+
+  const savedQuizzesList: { title: string; qCount: number; duration: string; category: string; slug: string }[] = [];
 
   const toggleTopic = (topic: string) => {
     setFavTopics((prev) =>
@@ -121,7 +133,7 @@ export function ProfilePageClient({
           </span>
           <Link
             href={`/${locale}/settings`}
-            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors backdrop-blur-md"
+            className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-[#93C5FD] hover:bg-white/20 transition-colors backdrop-blur-md"
           >
             <Settings className="w-5 h-5" />
           </Link>
@@ -146,19 +158,21 @@ export function ProfilePageClient({
         <div className="bg-white rounded-xl shadow-md border border-blue-100 p-4 flex items-center justify-between text-center divide-x divide-gray-100">
           <div className="flex flex-col items-center flex-1 px-2">
             <CheckCircle2 className="w-5 h-5 text-[#2563EB] mb-1" />
-            <span className="font-black text-lg text-slate-900 leading-none">24</span>
+            <span className="font-black text-lg text-slate-900 leading-none">{completedCount}</span>
             <span className="text-[10px] text-slate-400 font-bold mt-1">Completed</span>
           </div>
 
           <div className="flex flex-col items-center flex-1 px-2">
             <Flame className="w-5 h-5 text-orange-500 fill-orange-500 mb-1" />
-            <span className="font-black text-lg text-slate-900 leading-none">7 Days</span>
+            <span className="font-black text-lg text-slate-900 leading-none">
+              {streakDays} {streakDays === 1 ? 'Day' : 'Days'}
+            </span>
             <span className="text-[10px] text-slate-400 font-bold mt-1">Streak</span>
           </div>
 
           <div className="flex flex-col items-center flex-1 px-2">
             <Clock className="w-5 h-5 text-[#2563EB] mb-1" />
-            <span className="font-black text-lg text-slate-900 leading-none">3h 20m</span>
+            <span className="font-black text-lg text-slate-900 leading-none">{timeSpentFormatted}</span>
             <span className="text-[10px] text-slate-400 font-bold mt-1">Time Spent</span>
           </div>
         </div>
@@ -178,13 +192,15 @@ export function ProfilePageClient({
 
         <div className="w-full overflow-x-auto no-scrollbar pl-5 pr-5 pb-2">
           <div className="flex items-center gap-3">
-            {achievementsList.slice(0, 4).map((item, idx) => {
-              const Icon = item.icon;
+            {displayAchievements.slice(0, 4).map((item, idx) => {
+              const Icon = getAchievementIcon(item.iconType);
               return (
                 <div
                   key={idx}
                   onClick={() => setActiveModal('achievements')}
-                  className="w-[120px] bg-white border border-blue-100 rounded-xl p-3 flex flex-col items-center text-center shadow-sm shrink-0 cursor-pointer hover:shadow-md transition-all active:scale-[0.98]"
+                  className={`w-[120px] bg-white border rounded-xl p-3 flex flex-col items-center text-center shadow-sm shrink-0 cursor-pointer hover:shadow-md transition-all active:scale-[0.98] ${
+                    item.unlocked ? 'border-blue-100' : 'border-slate-100 opacity-60'
+                  }`}
                 >
                   <div
                     className={`w-12 h-12 rounded-xl flex items-center justify-center mb-2.5 ${item.bg}`}
@@ -299,8 +315,8 @@ export function ProfilePageClient({
             </div>
 
             <div className="grid grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-              {achievementsList.map((badge, i) => {
-                const BIcon = badge.icon;
+              {displayAchievements.map((badge, i) => {
+                const BIcon = getAchievementIcon(badge.iconType);
                 return (
                   <div
                     key={i}
@@ -352,28 +368,35 @@ export function ProfilePageClient({
             </div>
 
             <div className="space-y-3 max-h-[50vh] overflow-y-auto">
-              {savedQuizzesList.map((quiz, i) => (
-                <div
-                  key={i}
-                  className="p-3.5 rounded-xl border border-blue-100 bg-white flex items-center justify-between gap-3 shadow-sm"
-                >
-                  <div>
-                    <span className="text-[10px] font-bold text-[#2563EB] uppercase block mb-0.5">
-                      {quiz.category}
-                    </span>
-                    <h4 className="font-bold text-xs text-slate-900">{quiz.title}</h4>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
-                      {quiz.qCount} Questions • {quiz.duration}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/${locale}/quiz/${quiz.slug}`}
-                    className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shrink-0 shadow-sm"
-                  >
-                    Play Now
-                  </Link>
+              {savedQuizzesList.length === 0 ? (
+                <div className="text-center py-8">
+                  <Bookmark className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="text-xs text-slate-400 font-medium">No bookmarked quizzes yet.</p>
                 </div>
-              ))}
+              ) : (
+                savedQuizzesList.map((quiz, i) => (
+                  <div
+                    key={i}
+                    className="p-3.5 rounded-xl border border-blue-100 bg-white flex items-center justify-between gap-3 shadow-sm"
+                  >
+                    <div>
+                      <span className="text-[10px] font-bold text-[#2563EB] uppercase block mb-0.5">
+                        {quiz.category}
+                      </span>
+                      <h4 className="font-bold text-xs text-slate-900">{quiz.title}</h4>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        {quiz.qCount} Questions • {quiz.duration}
+                      </p>
+                    </div>
+                    <Link
+                      href={`/${locale}/quiz/${quiz.slug}`}
+                      className="px-3 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-lg shrink-0 shadow-sm"
+                    >
+                      Play Now
+                    </Link>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

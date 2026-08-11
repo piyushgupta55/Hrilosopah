@@ -1,4 +1,6 @@
 import { notFound } from 'next/navigation';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/lib/auth';
 import { QuizDetailWrapper } from '@/components/quiz/QuizDetailWrapper';
 import { prisma } from '@/lib/prisma';
 
@@ -7,6 +9,9 @@ export default async function QuizPage({
 }: {
   params: { locale: string; quizSlug: string };
 }) {
+  const session = await getServerSession(authOptions);
+  const userEmail = session?.user?.email || null;
+
   // 1. Fetch quiz directly from DB
   const quiz = await prisma.quiz.findFirst({
     where: { slug: params.quizSlug, isActive: true },
@@ -53,6 +58,7 @@ export default async function QuizPage({
     data: {
       quizId: quiz.id,
       sessionId,
+      email: userEmail,
     },
   });
 

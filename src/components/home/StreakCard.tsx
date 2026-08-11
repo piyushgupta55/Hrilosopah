@@ -16,25 +16,29 @@ interface StreakCardProps {
 }
 
 export const StreakCard = ({
-  streakDays = 7,
+  streakDays = 0,
   locale = 'en',
   labels = {
-    streakDays: '7 Day Streak',
-    keepItUp: 'Keep it up!',
+    streakDays: '0 Day Streak',
+    keepItUp: 'Start your streak today!',
     practiceNow: 'Practice Today',
   },
 }: StreakCardProps) => {
   const [showModal, setShowModal] = useState(false);
 
-  const weekDays = [
-    { label: 'M', completed: true },
-    { label: 'T', completed: true },
-    { label: 'W', completed: true, isToday: true },
-    { label: 'T', completed: true },
-    { label: 'F', completed: true },
-    { label: 'S', completed: true },
-    { label: 'S', completed: true },
-  ];
+  // Compute weekDays status dynamically based on streakDays
+  const daysOfWeek = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const todayIdx = (new Date().getDay() + 6) % 7; // Monday = 0, Sunday = 6
+
+  const weekDays = daysOfWeek.map((label, idx) => {
+    const isToday = idx === todayIdx;
+    const isCompleted = streakDays > 0 && idx <= todayIdx && todayIdx - idx < streakDays;
+    return {
+      label,
+      completed: isCompleted,
+      isToday,
+    };
+  });
 
   return (
     <>
@@ -122,8 +126,9 @@ export const StreakCard = ({
                 </div>
                 <h3 className="text-2xl font-black text-white">{streakDays} Day Streak!</h3>
                 <p className="text-xs text-gray-400 mt-1 max-w-[220px]">
-                  You&apos;ve completed quizzes 7 days in a row! Keep practicing daily to protect
-                  your streak.
+                  {streakDays > 0
+                    ? `You've completed quizzes ${streakDays} ${streakDays === 1 ? 'day' : 'days'} in a row! Keep practicing daily to protect your streak.`
+                    : 'Complete a quiz today to start your learning streak!'}
                 </p>
               </div>
 
@@ -146,11 +151,17 @@ export const StreakCard = ({
                     <Zap className="w-5 h-5 text-amber-400" />
                     <div className="text-left">
                       <div className="text-xs font-bold text-white">Daily Goal</div>
-                      <div className="text-[10px] text-gray-400">1 Quiz completed today</div>
+                      <div className="text-[10px] text-gray-400">
+                        {streakDays > 0 ? 'Quiz completed today' : 'No quiz completed today'}
+                      </div>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold">
-                    Completed
+                  <span
+                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                      streakDays > 0 ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-gray-400'
+                    }`}
+                  >
+                    {streakDays > 0 ? 'Completed' : 'Pending'}
                   </span>
                 </div>
               </div>
