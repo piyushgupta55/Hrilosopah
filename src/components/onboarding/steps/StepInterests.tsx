@@ -50,7 +50,7 @@ export const StepInterests = ({ interests, onChange, onNext }: StepInterestsProp
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col h-full overflow-hidden"
+      className="flex-1 flex flex-col min-h-full"
     >
       {/* Fixed Step Header */}
       <div className="shrink-0 mb-1">

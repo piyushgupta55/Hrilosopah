@@ -19,7 +19,7 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col justify-between pb-6 h-full"
+      className="flex-1 flex flex-col justify-between pb-4 sm:pb-6 min-h-full"
     >
       <div>
         <StepHeader
@@ -28,8 +28,8 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
         />
 
         {/* Custom Illustration */}
-        <div className="w-full flex justify-center py-6">
-          <div className="relative w-48 h-32 flex items-end justify-center">
+        <div className="w-full flex justify-center py-4 sm:py-6">
+          <div className="relative w-44 sm:w-48 h-28 sm:h-32 flex items-end justify-center">
             {/* Stars */}
             <motion.div
               animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
@@ -107,7 +107,7 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
         </div>
       </div>
 
-      <div className="w-full mt-8 space-y-3">
+      <div className="w-full mt-6 sm:mt-8 space-y-3">
         <PrimaryButton label={t('startExploring')} onClick={onNext} />
         <button
           onClick={onNext}

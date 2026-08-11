@@ -58,7 +58,7 @@ export const StepTime = ({ time, onChange, onNext }: StepTimeProps) => {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col justify-between pb-6 h-full"
+      className="flex-1 flex flex-col justify-between pb-4 sm:pb-6 min-h-full"
     >
       <div>
         <StepHeader
@@ -71,7 +71,7 @@ export const StepTime = ({ time, onChange, onNext }: StepTimeProps) => {
           subtitle={t('timeSubtitle')}
         />
 
-        <div className="flex flex-col space-y-3">
+        <div className="flex flex-col space-y-2.5 sm:space-y-3">
           {TIME_OPTIONS.map((option, i) => {
             const { labelKey, descKey } = getKeys(option.id);
             return (
@@ -94,7 +94,7 @@ export const StepTime = ({ time, onChange, onNext }: StepTimeProps) => {
         </div>
       </div>
 
-      <div className="w-full mt-8">
+      <div className="w-full mt-6 sm:mt-8">
         <PrimaryButton label={t('continue')} onClick={onNext} disabled={!time} />
       </div>
     </motion.div>

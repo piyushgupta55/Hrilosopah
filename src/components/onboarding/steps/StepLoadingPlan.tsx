@@ -35,7 +35,7 @@ export const StepLoadingPlan = ({ onComplete }: StepLoadingPlanProps) => {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col items-center pt-8 pb-6 h-full"
+      className="flex-1 flex flex-col items-center pt-4 sm:pt-8 pb-6 min-h-full"
     >
       <div className="w-full">
         <StepHeader

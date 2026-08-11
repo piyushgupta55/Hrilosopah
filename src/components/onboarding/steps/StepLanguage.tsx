@@ -37,12 +37,12 @@ export const StepLanguage = ({ onNext }: StepLanguageProps) => {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col justify-between pb-6 h-full"
+      className="flex-1 flex flex-col justify-between pb-4 sm:pb-6 min-h-full"
     >
-      <div className="flex-grow flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0">
         <StepHeader title={t('chooseLangTitle')} subtitle={t('chooseLangSubtitle')} />
 
-        <div className="flex-grow overflow-y-auto space-y-3 pr-1 max-h-[50vh]">
+        <div className="flex-1 overflow-y-auto space-y-2.5 sm:space-y-3 pr-1 py-1 min-h-0">
           {LANGUAGES.map((lang, i) => (
             <motion.div
               key={lang.code}

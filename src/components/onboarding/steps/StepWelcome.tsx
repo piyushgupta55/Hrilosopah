@@ -20,7 +20,7 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
       initial={{ opacity: 0, x: 50 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -50 }}
-      className="flex-1 flex flex-col justify-between pb-6 h-full"
+      className="flex-1 flex flex-col justify-between pb-4 sm:pb-6 min-h-full"
     >
       <div>
         <StepHeader
@@ -34,14 +34,14 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
         />
 
         {/* Custom SVG Illustration Area */}
-        <div className="w-full aspect-square relative flex items-center justify-center my-6">
+        <div className="w-full aspect-square relative flex items-center justify-center my-3 sm:my-6 mx-auto">
           <motion.div
             animate={{ y: [-5, 5, -5] }}
             transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            className="relative w-full h-full max-w-[280px] max-h-[280px] flex items-center justify-center"
+            className="relative w-full h-full max-w-[220px] max-h-[220px] sm:max-w-[280px] sm:max-h-[280px] flex items-center justify-center"
           >
             {/* Background shadow ellipse */}
-            <div className="absolute bottom-0 w-[200px] h-[30px] bg-[#E5E7EB] rounded-[100%] blur-md opacity-70 translate-y-6" />
+            <div className="absolute bottom-0 w-[180px] sm:w-[200px] h-[24px] sm:h-[30px] bg-[#E5E7EB] rounded-[100%] blur-md opacity-70 translate-y-6" />
 
             {/* Tablet Device */}
             <div className="relative w-[180px] h-[220px] bg-white border-[3px] border-[#E5E7EB] rounded-[24px] shadow-sm transform -rotate-12 z-10 flex flex-col overflow-hidden">
