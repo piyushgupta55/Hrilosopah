@@ -130,7 +130,7 @@ export default function ProgressPage() {
                   strokeWidth="10"
                   fill="none"
                   strokeDasharray="251.2"
-                  strokeDashoffset={251.2 * (1 - (stats.accuracyPercentage / 100))}
+                  strokeDashoffset={251.2 * (1 - stats.accuracyPercentage / 100)}
                   strokeLinecap="round"
                 />
               </svg>
@@ -230,13 +230,16 @@ export default function ProgressPage() {
 
         {/* Quiz Cards */}
         {loading ? (
-          <div className="text-center py-8 text-xs text-slate-400 font-medium">Loading stats...</div>
+          <div className="text-center py-8 text-xs text-slate-400 font-medium">
+            Loading stats...
+          </div>
         ) : filteredQuizzes.length === 0 ? (
           <div className="bg-white border border-blue-100 rounded-xl p-8 text-center shadow-sm">
             <FileQuestion className="w-10 h-10 text-slate-300 mx-auto mb-2" />
             <h4 className="font-bold text-sm text-slate-900 mb-1">No completed tests yet</h4>
             <p className="text-xs text-slate-400 mb-4 max-w-xs mx-auto">
-              Take your first quiz to track your accuracy, earn XP, and view detailed answer analytics!
+              Take your first quiz to track your accuracy, earn XP, and view detailed answer
+              analytics!
             </p>
             <Link
               href={`/${locale}/play`}

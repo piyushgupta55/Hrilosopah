@@ -3,6 +3,8 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);
@@ -98,7 +100,12 @@ export async function GET() {
 
       const durationSecs =
         a.completedAt && a.startedAt
-          ? Math.max(1, Math.floor((new Date(a.completedAt).getTime() - new Date(a.startedAt).getTime()) / 1000))
+          ? Math.max(
+              1,
+              Math.floor(
+                (new Date(a.completedAt).getTime() - new Date(a.startedAt).getTime()) / 1000
+              )
+            )
           : 0;
 
       const durationStr =
@@ -108,7 +115,10 @@ export async function GET() {
 
       return {
         id: a.id,
-        title: a.quiz.slug.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' '),
+        title: a.quiz.slug
+          .split('-')
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join(' '),
         category: a.quiz.category.toUpperCase(),
         date: dateStr,
         timeSpent: durationStr,
@@ -131,7 +141,8 @@ export async function GET() {
       }
     }
 
-    const accuracyPercentage = totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
+    const accuracyPercentage =
+      totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
     const totalPoints = totalCorrect * 100;
 
     return NextResponse.json({

@@ -166,7 +166,10 @@ export default async function HomePage({ params: { locale } }: { params: { local
       <div className="px-5 w-full mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-gray-900 text-lg">{t('continueLearning')}</h3>
-          <Link href={`/${locale}/play`} className="text-blue-600 text-sm font-semibold hover:text-blue-700">
+          <Link
+            href={`/${locale}/play`}
+            className="text-blue-600 text-sm font-semibold hover:text-blue-700"
+          >
             {t('seeAll')}
           </Link>
         </div>
@@ -183,12 +186,18 @@ export default async function HomePage({ params: { locale } }: { params: { local
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-gray-900 text-base truncate mb-1">
-                  {latestQuiz.slug.split('-').map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' ')}
+                  {latestQuiz.slug
+                    .split('-')
+                    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                    .join(' ')}
                 </h4>
                 <p className="text-gray-500 text-xs mb-2">{t('quizDesc')}</p>
                 <div className="flex items-center gap-3">
                   <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#4F46E5] rounded-full" style={{ width: `${latestScorePct}%` }}></div>
+                    <div
+                      className="h-full bg-[#4F46E5] rounded-full"
+                      style={{ width: `${latestScorePct}%` }}
+                    ></div>
                   </div>
                   <span className="text-xs font-semibold text-gray-600 w-8">{latestScorePct}%</span>
                 </div>
@@ -208,7 +217,9 @@ export default async function HomePage({ params: { locale } }: { params: { local
                 <h4 className="font-bold text-gray-900 text-base truncate mb-0.5">
                   {tCards('aiAwareness')}
                 </h4>
-                <p className="text-gray-500 text-xs">Start your first quiz to begin tracking your progress!</p>
+                <p className="text-gray-500 text-xs">
+                  Start your first quiz to begin tracking your progress!
+                </p>
               </div>
               <div className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-bold shrink-0 flex items-center gap-1">
                 <span>Start</span>
@@ -288,7 +299,9 @@ export default async function HomePage({ params: { locale } }: { params: { local
               <span className="text-[10px] text-gray-500 font-medium">{t('avgScore')}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center px-1 border-r border-gray-100 pt-1 min-[400px]:pt-0">
-              <span className="font-bold text-xl text-gray-900 mb-1 whitespace-nowrap">{timeSpentFormatted}</span>
+              <span className="font-bold text-xl text-gray-900 mb-1 whitespace-nowrap">
+                {timeSpentFormatted}
+              </span>
               <span className="text-[10px] text-gray-500 font-medium">{t('timeSpent')}</span>
             </div>
             <div className="flex flex-col items-center justify-center text-center px-1 pt-1 min-[400px]:pt-0">

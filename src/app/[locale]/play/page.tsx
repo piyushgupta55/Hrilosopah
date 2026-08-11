@@ -95,10 +95,15 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>{aiProgress.score} / {aiProgress.total}</span>
+                    <span>
+                      {aiProgress.score} / {aiProgress.total}
+                    </span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${aiProgress.pct}%` }}></div>
+                    <div
+                      className="h-full bg-white rounded-full"
+                      style={{ width: `${aiProgress.pct}%` }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -118,10 +123,15 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>{cryptoProgress.score} / {cryptoProgress.total}</span>
+                    <span>
+                      {cryptoProgress.score} / {cryptoProgress.total}
+                    </span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${cryptoProgress.pct}%` }}></div>
+                    <div
+                      className="h-full bg-white rounded-full"
+                      style={{ width: `${cryptoProgress.pct}%` }}
+                    ></div>
                   </div>
                 </div>
               </div>
@@ -142,10 +152,15 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                 </h4>
                 <div className="w-full">
                   <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>{mlProgress.score} / {mlProgress.total}</span>
+                    <span>
+                      {mlProgress.score} / {mlProgress.total}
+                    </span>
                   </div>
                   <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full" style={{ width: `${mlProgress.pct}%` }}></div>
+                    <div
+                      className="h-full bg-white rounded-full"
+                      style={{ width: `${mlProgress.pct}%` }}
+                    ></div>
                   </div>
                 </div>
               </div>

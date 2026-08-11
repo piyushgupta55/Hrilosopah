@@ -112,7 +112,13 @@ export function ProfilePageClient({
 
   const displayAchievements = achievementsList.length > 0 ? achievementsList : defaultAchievements;
 
-  const savedQuizzesList: { title: string; qCount: number; duration: string; category: string; slug: string }[] = [];
+  const savedQuizzesList: {
+    title: string;
+    qCount: number;
+    duration: string;
+    category: string;
+    slug: string;
+  }[] = [];
 
   const toggleTopic = (topic: string) => {
     setFavTopics((prev) =>
@@ -172,7 +178,9 @@ export function ProfilePageClient({
 
           <div className="flex flex-col items-center flex-1 px-2">
             <Clock className="w-5 h-5 text-[#2563EB] mb-1" />
-            <span className="font-black text-lg text-slate-900 leading-none">{timeSpentFormatted}</span>
+            <span className="font-black text-lg text-slate-900 leading-none">
+              {timeSpentFormatted}
+            </span>
             <span className="text-[10px] text-slate-400 font-bold mt-1">Time Spent</span>
           </div>
         </div>
