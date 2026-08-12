@@ -573,84 +573,161 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
               </span>
             </div>
 
-            {/* Questions Table */}
-            <div className="bg-white border border-blue-100 rounded-3xl overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs sm:text-sm">
-                  <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
-                    <tr>
-                      <th className="p-4 w-12 text-center">#</th>
-                      <th className="p-4">Question Text & Correct Answer</th>
-                      <th className="p-4 w-28">Difficulty</th>
-                      <th className="p-4 w-40 text-center">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-100 font-medium">
-                    {filteredQuestions.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="p-12 text-center space-y-3">
-                          <p className="text-slate-500 font-bold text-sm">
-                            No questions found in {selectedCategory}.
+            {/* Questions List: Mobile Cards + Desktop Table */}
+            <div className="space-y-4">
+              {/* Mobile Cards (Visible on screens < md) */}
+              <div className="block md:hidden space-y-3">
+                {filteredQuestions.length === 0 ? (
+                  <div className="bg-white border border-blue-100 rounded-3xl p-8 text-center space-y-3">
+                    <p className="text-slate-500 font-bold text-sm">
+                      No questions found in {selectedCategory}.
+                    </p>
+                    <button
+                      onClick={() => openAddModal(selectedCategory)}
+                      className="px-4 py-2.5 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-sm"
+                    >
+                      + Add Question to {selectedCategory}
+                    </button>
+                  </div>
+                ) : (
+                  filteredQuestions.map((q, idx) => {
+                    const correctAnswerText = q.options[q.correctOptionIndex] || q.options[0];
+                    return (
+                      <div
+                        key={q.id}
+                        className="bg-white border border-blue-100 rounded-2xl p-4 shadow-sm space-y-3"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-black text-xs text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded-lg border border-blue-100">
+                            Q{idx + 1}
+                          </span>
+                          <span className="px-2.5 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-extrabold rounded-lg uppercase">
+                            {q.difficulty}
+                          </span>
+                        </div>
+
+                        <h4 className="font-extrabold text-slate-900 text-xs sm:text-sm leading-snug">
+                          {q.text}
+                        </h4>
+
+                        <div className="p-2.5 bg-emerald-50/60 border border-emerald-200 rounded-xl space-y-1">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase block">
+                            Correct Answer
+                          </span>
+                          <span className="text-xs font-extrabold text-emerald-800 block">
+                            ✓ {correctAnswerText}
+                          </span>
+                        </div>
+
+                        {q.explanation && (
+                          <p className="text-[11px] text-slate-500 italic bg-slate-50 p-2 rounded-lg">
+                            Explain: {q.explanation}
                           </p>
+                        )}
+
+                        <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-2">
                           <button
-                            onClick={() => openAddModal(selectedCategory)}
-                            className="px-4 py-2 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-sm"
+                            onClick={() => openEditModal(q)}
+                            className="py-2 bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 flex items-center justify-center gap-1 transition-all shadow-sm"
                           >
-                            + Add Question to {selectedCategory}
+                            <Edit3 className="w-3.5 h-3.5" />
+                            <span>Edit / Update</span>
                           </button>
-                        </td>
+                          <button
+                            onClick={() => handleDelete(q.id)}
+                            className="py-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl border border-red-100 transition-all flex items-center justify-center gap-1"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Desktop Table (Visible on screens >= md) */}
+              <div className="hidden md:block bg-white border border-blue-100 rounded-3xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs sm:text-sm">
+                    <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
+                      <tr>
+                        <th className="p-4 w-12 text-center">#</th>
+                        <th className="p-4">Question Text & Correct Answer</th>
+                        <th className="p-4 w-28">Difficulty</th>
+                        <th className="p-4 w-40 text-center">Actions</th>
                       </tr>
-                    ) : (
-                      filteredQuestions.map((q, idx) => {
-                        const correctAnswerText = q.options[q.correctOptionIndex] || q.options[0];
-                        return (
-                          <tr key={q.id} className="hover:bg-blue-50/40 transition-colors">
-                            <td className="p-4 text-center font-black text-slate-400">{idx + 1}</td>
-                            <td className="p-4 space-y-1.5">
-                              <h4 className="font-extrabold text-slate-900 leading-snug whitespace-pre-wrap">
-                                {q.text}
-                              </h4>
-                              <div className="flex flex-wrap items-center gap-2 text-xs">
-                                <span className="font-bold text-slate-400">Correct Answer:</span>
-                                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-extrabold rounded-md border border-emerald-200">
-                                  ✓ {correctAnswerText}
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 font-medium">
+                      {filteredQuestions.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="p-12 text-center space-y-3">
+                            <p className="text-slate-500 font-bold text-sm">
+                              No questions found in {selectedCategory}.
+                            </p>
+                            <button
+                              onClick={() => openAddModal(selectedCategory)}
+                              className="px-4 py-2 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-sm"
+                            >
+                              + Add Question to {selectedCategory}
+                            </button>
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredQuestions.map((q, idx) => {
+                          const correctAnswerText = q.options[q.correctOptionIndex] || q.options[0];
+                          return (
+                            <tr key={q.id} className="hover:bg-blue-50/40 transition-colors">
+                              <td className="p-4 text-center font-black text-slate-400">
+                                {idx + 1}
+                              </td>
+                              <td className="p-4 space-y-1.5">
+                                <h4 className="font-extrabold text-slate-900 leading-snug whitespace-pre-wrap">
+                                  {q.text}
+                                </h4>
+                                <div className="flex flex-wrap items-center gap-2 text-xs">
+                                  <span className="font-bold text-slate-400">Correct Answer:</span>
+                                  <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-extrabold rounded-md border border-emerald-200">
+                                    ✓ {correctAnswerText}
+                                  </span>
+                                </div>
+                                {q.explanation && (
+                                  <p className="text-[11px] text-slate-500 italic">
+                                    Explain: {q.explanation}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="p-4">
+                                <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg uppercase">
+                                  {q.difficulty}
                                 </span>
-                              </div>
-                              {q.explanation && (
-                                <p className="text-[11px] text-slate-500 italic">
-                                  Explain: {q.explanation}
-                                </p>
-                              )}
-                            </td>
-                            <td className="p-4">
-                              <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg uppercase">
-                                {q.difficulty}
-                              </span>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex items-center justify-center gap-2">
-                                <button
-                                  onClick={() => openEditModal(q)}
-                                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 flex items-center gap-1 transition-all shadow-sm"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                  <span>Edit / Update</span>
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(q.id)}
-                                  className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
-                                  title="Delete Question"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex items-center justify-center gap-2">
+                                  <button
+                                    onClick={() => openEditModal(q)}
+                                    className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 flex items-center gap-1 transition-all shadow-sm"
+                                  >
+                                    <Edit3 className="w-3.5 h-3.5" />
+                                    <span>Edit / Update</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(q.id)}
+                                    className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
+                                    title="Delete Question"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>

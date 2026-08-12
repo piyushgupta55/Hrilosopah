@@ -227,100 +227,175 @@ export default function AdminUsersPage() {
               </p>
             </div>
           ) : (
-            /* Main Table */
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100">
-                  <tr>
-                    <th className="p-4 sm:p-5">Name / Email</th>
-                    <th className="p-4 sm:p-5">Joined Date</th>
-                    <th className="p-4 sm:p-5">Streak</th>
-                    <th className="p-4 sm:p-5">Total XP</th>
-                    <th className="p-4 sm:p-5">Language</th>
-                    <th className="p-4 sm:p-5">Status</th>
-                    <th className="p-4 sm:p-5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium">
-                  {paginatedUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-blue-50/40 transition-colors">
-                      {/* Name / Email Column */}
-                      <td className="p-4 sm:p-5 font-bold text-slate-900">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#2563EB] font-black text-sm shrink-0">
-                            {(u.name || 'L').charAt(0).toUpperCase()}
-                          </div>
-                          <div>
-                            <span className="block text-slate-900 font-extrabold">{u.name}</span>
-                            <span className="text-xs text-slate-500 font-normal flex items-center gap-1">
-                              <Mail className="w-3 h-3 text-slate-400" />
-                              {u.email}
-                            </span>
-                          </div>
+            /* Main Table & Mobile Cards */
+            <div className="space-y-4">
+              {/* Mobile Cards (Visible on screens < md) */}
+              <div className="block md:hidden divide-y divide-slate-100">
+                {paginatedUsers.map((u) => (
+                  <div
+                    key={u.id}
+                    className="p-4 space-y-3 bg-white hover:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#2563EB] font-black text-sm shrink-0">
+                          {(u.name || 'L').charAt(0).toUpperCase()}
                         </div>
-                      </td>
-
-                      {/* Signup Date */}
-                      <td className="p-4 sm:p-5 text-slate-600 font-medium">
-                        {formatDate(u.createdAt)}
-                      </td>
-
-                      {/* Current Streak */}
-                      <td className="p-4 sm:p-5">
-                        <div className="flex items-center gap-1 text-amber-600 font-black text-xs">
-                          <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
-                          <span>{u.currentStreak} Days</span>
+                        <div>
+                          <span className="block text-slate-900 font-extrabold text-sm">
+                            {u.name}
+                          </span>
+                          <span className="text-xs text-slate-500 font-normal flex items-center gap-1">
+                            <Mail className="w-3 h-3 text-slate-400" />
+                            {u.email}
+                          </span>
                         </div>
-                      </td>
+                      </div>
 
-                      {/* Total XP */}
-                      <td className="p-4 sm:p-5">
-                        <div className="flex items-center gap-1 text-purple-600 font-black text-xs">
-                          <Zap className="w-4 h-4 fill-purple-500 text-purple-500" />
-                          <span>{u.xp.toLocaleString()} XP</span>
-                        </div>
-                      </td>
+                      <span
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border shrink-0 inline-flex items-center gap-1 ${
+                          u.status === 'Active'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-red-50 text-red-700 border-red-200'
+                        }`}
+                      >
+                        {u.status === 'Active' ? (
+                          <UserCheck className="w-3 h-3 text-emerald-600" />
+                        ) : (
+                          <UserX className="w-3 h-3 text-red-600" />
+                        )}
+                        <span>{u.status}</span>
+                      </span>
+                    </div>
 
-                      {/* Language */}
-                      <td className="p-4 sm:p-5 text-slate-600">
-                        <div className="flex items-center gap-1">
-                          <Globe className="w-3.5 h-3.5 text-slate-400" />
-                          <span>{u.language}</span>
-                        </div>
-                      </td>
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-50">
+                      <div className="flex items-center gap-1 text-amber-600 font-black">
+                        <Flame className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                        <span>{u.currentStreak} Days</span>
+                      </div>
 
-                      {/* Account Status */}
-                      <td className="p-4 sm:p-5">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-extrabold border flex items-center gap-1 w-fit ${
-                            u.status === 'Active'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-red-50 text-red-700 border-red-200'
-                          }`}
-                        >
-                          {u.status === 'Active' ? (
-                            <UserCheck className="w-3 h-3 text-emerald-600" />
-                          ) : (
-                            <UserX className="w-3 h-3 text-red-600" />
-                          )}
-                          <span>{u.status}</span>
-                        </span>
-                      </td>
+                      <div className="flex items-center gap-1 text-purple-600 font-black">
+                        <Zap className="w-3.5 h-3.5 fill-purple-500 text-purple-500" />
+                        <span>{u.xp.toLocaleString()} XP</span>
+                      </div>
 
-                      {/* View Action */}
-                      <td className="p-4 sm:p-5 text-right">
-                        <Link
-                          href={`/${locale}/admin/users/${u.id}`}
-                          className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all inline-flex items-center gap-1"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          <span>View Profile</span>
-                        </Link>
-                      </td>
+                      <div className="flex items-center gap-1 text-slate-500 font-medium">
+                        <Globe className="w-3 h-3 text-slate-400" />
+                        <span>{u.language}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 flex items-center justify-between text-xs">
+                      <span className="text-[11px] text-slate-400 font-medium">
+                        Joined {formatDate(u.createdAt)}
+                      </span>
+                      <Link
+                        href={`/${locale}/admin/users/${u.id}`}
+                        className="px-3.5 py-1.5 bg-blue-50 hover:bg-[#2563EB] hover:text-white text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 transition-all inline-flex items-center gap-1"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View Profile</span>
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table (Visible on screens >= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100">
+                    <tr>
+                      <th className="p-4 sm:p-5">Name / Email</th>
+                      <th className="p-4 sm:p-5">Joined Date</th>
+                      <th className="p-4 sm:p-5">Streak</th>
+                      <th className="p-4 sm:p-5">Total XP</th>
+                      <th className="p-4 sm:p-5">Language</th>
+                      <th className="p-4 sm:p-5">Status</th>
+                      <th className="p-4 sm:p-5 text-right">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-medium">
+                    {paginatedUsers.map((u) => (
+                      <tr key={u.id} className="hover:bg-blue-50/40 transition-colors">
+                        {/* Name / Email Column */}
+                        <td className="p-4 sm:p-5 font-bold text-slate-900">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#2563EB] font-black text-sm shrink-0">
+                              {(u.name || 'L').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                              <span className="block text-slate-900 font-extrabold">{u.name}</span>
+                              <span className="text-xs text-slate-500 font-normal flex items-center gap-1">
+                                <Mail className="w-3 h-3 text-slate-400" />
+                                {u.email}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Signup Date */}
+                        <td className="p-4 sm:p-5 text-slate-600 font-medium">
+                          {formatDate(u.createdAt)}
+                        </td>
+
+                        {/* Current Streak */}
+                        <td className="p-4 sm:p-5">
+                          <div className="flex items-center gap-1 text-amber-600 font-black text-xs">
+                            <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
+                            <span>{u.currentStreak} Days</span>
+                          </div>
+                        </td>
+
+                        {/* Total XP */}
+                        <td className="p-4 sm:p-5">
+                          <div className="flex items-center gap-1 text-purple-600 font-black text-xs">
+                            <Zap className="w-4 h-4 fill-purple-500 text-purple-500" />
+                            <span>{u.xp.toLocaleString()} XP</span>
+                          </div>
+                        </td>
+
+                        {/* Language */}
+                        <td className="p-4 sm:p-5 text-slate-600">
+                          <div className="flex items-center gap-1">
+                            <Globe className="w-3.5 h-3.5 text-slate-400" />
+                            <span>{u.language}</span>
+                          </div>
+                        </td>
+
+                        {/* Account Status */}
+                        <td className="p-4 sm:p-5">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-xs font-extrabold border flex items-center gap-1 w-fit ${
+                              u.status === 'Active'
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-red-50 text-red-700 border-red-200'
+                            }`}
+                          >
+                            {u.status === 'Active' ? (
+                              <UserCheck className="w-3 h-3 text-emerald-600" />
+                            ) : (
+                              <UserX className="w-3 h-3 text-red-600" />
+                            )}
+                            <span>{u.status}</span>
+                          </span>
+                        </td>
+
+                        {/* View Action */}
+                        <td className="p-4 sm:p-5 text-right">
+                          <Link
+                            href={`/${locale}/admin/users/${u.id}`}
+                            className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all inline-flex items-center gap-1"
+                          >
+                            <Eye className="w-3.5 h-3.5" />
+                            <span>View Profile</span>
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
 

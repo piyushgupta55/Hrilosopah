@@ -151,40 +151,74 @@ export default async function AdminPaymentsPage({
               automatically.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
-                  <tr>
-                    <th className="p-4 sm:p-5">Customer Email / Session</th>
-                    <th className="p-4 sm:p-5">Plan / Product</th>
-                    <th className="p-4 sm:p-5">Amount</th>
-                    <th className="p-4 sm:p-5">Date</th>
-                    <th className="p-4 sm:p-5">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 font-medium">
-                  {dbPayments.map((t) => (
-                    <tr key={t.id} className="hover:bg-blue-50/50 transition-colors">
-                      <td className="p-4 sm:p-5 font-bold text-slate-900">
-                        {t.attempt?.email ||
-                          `Session ${t.attempt?.sessionId?.substring(0, 12) || t.id.substring(0, 8)}...`}
-                      </td>
-                      <td className="p-4 sm:p-5 text-slate-600">Results & Certificate Unlock</td>
-                      <td className="p-4 sm:p-5 text-[#2563EB] font-black">
-                        ${(t.amount / 100).toFixed(2)}
-                      </td>
-                      <td className="p-4 sm:p-5 text-slate-500">
-                        {new Date(t.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="p-4 sm:p-5">
-                        <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100 uppercase">
-                          {t.status}
+            <div className="space-y-4">
+              {/* Mobile Cards (Visible on screens < md) */}
+              <div className="block md:hidden divide-y divide-slate-100">
+                {dbPayments.map((t) => (
+                  <div key={t.id} className="p-4 space-y-2 bg-white">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="block font-bold text-slate-900 text-xs">
+                          {t.attempt?.email ||
+                            `Session ${t.attempt?.sessionId?.substring(0, 12) || t.id.substring(0, 8)}...`}
                         </span>
-                      </td>
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          Results & Certificate Unlock
+                        </span>
+                      </div>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100 uppercase shrink-0">
+                        {t.status}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-50">
+                      <span className="text-slate-500 text-[11px]">
+                        {new Date(t.createdAt).toLocaleDateString()}
+                      </span>
+                      <span className="text-[#2563EB] font-black text-sm">
+                        ${(t.amount / 100).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table (Visible on screens >= md) */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
+                    <tr>
+                      <th className="p-4 sm:p-5">Customer Email / Session</th>
+                      <th className="p-4 sm:p-5">Plan / Product</th>
+                      <th className="p-4 sm:p-5">Amount</th>
+                      <th className="p-4 sm:p-5">Date</th>
+                      <th className="p-4 sm:p-5">Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {dbPayments.map((t) => (
+                      <tr key={t.id} className="hover:bg-blue-50/50 transition-colors">
+                        <td className="p-4 sm:p-5 font-bold text-slate-900">
+                          {t.attempt?.email ||
+                            `Session ${t.attempt?.sessionId?.substring(0, 12) || t.id.substring(0, 8)}...`}
+                        </td>
+                        <td className="p-4 sm:p-5 text-slate-600">Results & Certificate Unlock</td>
+                        <td className="p-4 sm:p-5 text-[#2563EB] font-black">
+                          ${(t.amount / 100).toFixed(2)}
+                        </td>
+                        <td className="p-4 sm:p-5 text-slate-500">
+                          {new Date(t.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-4 sm:p-5">
+                          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100 uppercase">
+                            {t.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

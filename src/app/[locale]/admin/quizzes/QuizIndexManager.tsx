@@ -338,134 +338,237 @@ export function QuizIndexManager() {
             </Link>
           </div>
         ) : (
-          /* Quizzes Table */
-          <div className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
-                  <tr>
-                    <th className="p-4 sm:p-5">Title & Slug</th>
-                    <th className="p-4 sm:p-5">Category</th>
-                    <th className="p-4 sm:p-5">Difficulty</th>
-                    <th className="p-4 sm:p-5">Question Count</th>
-                    <th className="p-4 sm:p-5">Status</th>
-                    <th className="p-4 sm:p-5">Last Updated</th>
-                    <th className="p-4 sm:p-5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 font-medium">
-                  {filteredQuizzes.map((quiz) => (
-                    <tr key={quiz.id} className="hover:bg-blue-50/40 transition-colors">
-                      {/* Title Column */}
-                      <td className="p-4 sm:p-5 font-bold text-slate-900">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#2563EB] shrink-0">
-                            <BookOpen className="w-4.5 h-4.5" />
+          /* Quizzes List: Mobile Cards + Desktop Table */
+          <div className="space-y-4">
+            {/* Mobile Cards (Visible on screens < md) */}
+            <div className="block md:hidden space-y-3">
+              {filteredQuizzes.map((quiz) => (
+                <div
+                  key={quiz.id}
+                  className="bg-white border border-blue-100 rounded-2xl p-4 shadow-sm space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#2563EB] shrink-0">
+                        <BookOpen className="w-4.5 h-4.5" />
+                      </div>
+                      <div>
+                        <h4 className="font-extrabold text-slate-900 text-sm">{quiz.title}</h4>
+                        <span className="text-[10px] text-slate-400 font-mono block">
+                          slug: {quiz.slug}
+                        </span>
+                      </div>
+                    </div>
+
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border shrink-0 inline-flex items-center gap-1 ${
+                        quiz.isActive
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}
+                    >
+                      {quiz.isActive ? (
+                        <CheckCircle className="w-3 h-3 text-emerald-600" />
+                      ) : (
+                        <XCircle className="w-3 h-3 text-amber-600" />
+                      )}
+                      <span>{quiz.status}</span>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100">
+                      {quiz.category}
+                    </span>
+
+                    <span
+                      className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold capitalize ${
+                        quiz.difficulty === 'advanced'
+                          ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                          : quiz.difficulty === 'intermediate'
+                            ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                            : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}
+                    >
+                      {quiz.difficulty}
+                    </span>
+
+                    <span className="text-[11px] font-extrabold text-slate-600">
+                      {quiz.questionsCount} Qs
+                    </span>
+
+                    <span className="text-[10px] text-slate-400 ml-auto">
+                      {formatDate(quiz.updatedAt)}
+                    </span>
+                  </div>
+
+                  {/* Actions Grid on Mobile */}
+                  <div className="pt-2 border-t border-slate-100 grid grid-cols-3 gap-2">
+                    <Link
+                      href={`/${locale}/admin/quizzes/${quiz.id}/edit`}
+                      className="py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all flex items-center justify-center gap-1"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </Link>
+
+                    <button
+                      onClick={() => handleTogglePublish(quiz)}
+                      disabled={publishingId === quiz.id}
+                      className={`py-2 font-extrabold text-xs rounded-xl border transition-all flex items-center justify-center gap-1 ${
+                        quiz.isActive
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                    >
+                      {publishingId === quiz.id ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <span>{quiz.isActive ? 'Unpublish' : 'Publish'}</span>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => setDeletingQuiz(quiz)}
+                      className="py-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs rounded-xl border border-red-100 transition-all flex items-center justify-center gap-1"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop Table (Visible on screens >= md) */}
+            <div className="hidden md:block bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
+                    <tr>
+                      <th className="p-4 sm:p-5">Title & Slug</th>
+                      <th className="p-4 sm:p-5">Category</th>
+                      <th className="p-4 sm:p-5">Difficulty</th>
+                      <th className="p-4 sm:p-5">Question Count</th>
+                      <th className="p-4 sm:p-5">Status</th>
+                      <th className="p-4 sm:p-5">Last Updated</th>
+                      <th className="p-4 sm:p-5 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {filteredQuizzes.map((quiz) => (
+                      <tr key={quiz.id} className="hover:bg-blue-50/40 transition-colors">
+                        {/* Title Column */}
+                        <td className="p-4 sm:p-5 font-bold text-slate-900">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-[#2563EB] shrink-0">
+                              <BookOpen className="w-4.5 h-4.5" />
+                            </div>
+                            <div>
+                              <span className="block font-extrabold text-slate-900 text-sm">
+                                {quiz.title}
+                              </span>
+                              <span className="text-[11px] text-slate-400 font-normal">
+                                slug: {quiz.slug}
+                              </span>
+                            </div>
                           </div>
-                          <div>
-                            <span className="block font-extrabold text-slate-900 text-sm">
-                              {quiz.title}
-                            </span>
-                            <span className="text-[11px] text-slate-400 font-normal">
-                              slug: {quiz.slug}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Category Column */}
-                      <td className="p-4 sm:p-5">
-                        <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100">
-                          {quiz.category}
-                        </span>
-                      </td>
+                        {/* Category Column */}
+                        <td className="p-4 sm:p-5">
+                          <span className="px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#2563EB] border border-blue-100">
+                            {quiz.category}
+                          </span>
+                        </td>
 
-                      {/* Difficulty Column */}
-                      <td className="p-4 sm:p-5 capitalize">
-                        <span
-                          className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
-                            quiz.difficulty === 'advanced'
-                              ? 'bg-purple-50 text-purple-700 border border-purple-200'
-                              : quiz.difficulty === 'intermediate'
-                                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                                : 'bg-slate-100 text-slate-700 border border-slate-200'
-                          }`}
-                        >
-                          {quiz.difficulty}
-                        </span>
-                      </td>
-
-                      {/* Question Count Column */}
-                      <td className="p-4 sm:p-5 font-extrabold text-slate-700">
-                        {quiz.questionsCount} Questions
-                      </td>
-
-                      {/* Status Column */}
-                      <td className="p-4 sm:p-5">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-extrabold border inline-flex items-center gap-1 ${
-                            quiz.isActive
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                              : 'bg-amber-50 text-amber-700 border-amber-200'
-                          }`}
-                        >
-                          {quiz.isActive ? (
-                            <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
-                          ) : (
-                            <XCircle className="w-3.5 h-3.5 text-amber-600" />
-                          )}
-                          <span>{quiz.status}</span>
-                        </span>
-                      </td>
-
-                      {/* Last Updated Column */}
-                      <td className="p-4 sm:p-5 text-slate-500 text-xs font-medium">
-                        {formatDate(quiz.updatedAt)}
-                      </td>
-
-                      {/* Actions Column */}
-                      <td className="p-4 sm:p-5 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {/* Edit Action */}
-                          <Link
-                            href={`/${locale}/admin/quizzes/${quiz.id}/edit`}
-                            className="px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </Link>
-
-                          {/* Publish/Unpublish Action */}
-                          <button
-                            onClick={() => handleTogglePublish(quiz)}
-                            disabled={publishingId === quiz.id}
-                            className={`px-3 py-1.5 font-extrabold text-xs rounded-xl border transition-all flex items-center gap-1 ${
-                              quiz.isActive
-                                ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
-                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                        {/* Difficulty Column */}
+                        <td className="p-4 sm:p-5 capitalize">
+                          <span
+                            className={`px-2.5 py-1 rounded-lg text-xs font-bold ${
+                              quiz.difficulty === 'advanced'
+                                ? 'bg-purple-50 text-purple-700 border border-purple-200'
+                                : quiz.difficulty === 'intermediate'
+                                  ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                                  : 'bg-slate-100 text-slate-700 border border-slate-200'
                             }`}
                           >
-                            {publishingId === quiz.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <span>{quiz.isActive ? 'Unpublish' : 'Publish'}</span>
-                            )}
-                          </button>
+                            {quiz.difficulty}
+                          </span>
+                        </td>
 
-                          {/* Delete Action */}
-                          <button
-                            onClick={() => setDeletingQuiz(quiz)}
-                            className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
-                            title="Delete Quiz"
+                        {/* Question Count Column */}
+                        <td className="p-4 sm:p-5 font-extrabold text-slate-700">
+                          {quiz.questionsCount} Questions
+                        </td>
+
+                        {/* Status Column */}
+                        <td className="p-4 sm:p-5">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-extrabold border inline-flex items-center gap-1 ${
+                              quiz.isActive
+                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                : 'bg-amber-50 text-amber-700 border-amber-200'
+                            }`}
                           >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                            {quiz.isActive ? (
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                            ) : (
+                              <XCircle className="w-3.5 h-3.5 text-amber-600" />
+                            )}
+                            <span>{quiz.status}</span>
+                          </span>
+                        </td>
+
+                        {/* Last Updated Column */}
+                        <td className="p-4 sm:p-5 text-slate-500 text-xs font-medium">
+                          {formatDate(quiz.updatedAt)}
+                        </td>
+
+                        {/* Actions Column */}
+                        <td className="p-4 sm:p-5 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            {/* Edit Action */}
+                            <Link
+                              href={`/${locale}/admin/quizzes/${quiz.id}/edit`}
+                              className="px-3 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all flex items-center gap-1"
+                            >
+                              <Edit3 className="w-3.5 h-3.5" />
+                              <span>Edit</span>
+                            </Link>
+
+                            {/* Publish/Unpublish Action */}
+                            <button
+                              onClick={() => handleTogglePublish(quiz)}
+                              disabled={publishingId === quiz.id}
+                              className={`px-3 py-1.5 font-extrabold text-xs rounded-xl border transition-all flex items-center gap-1 ${
+                                quiz.isActive
+                                  ? 'bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200'
+                                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                              }`}
+                            >
+                              {publishingId === quiz.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <span>{quiz.isActive ? 'Unpublish' : 'Publish'}</span>
+                              )}
+                            </button>
+
+                            {/* Delete Action */}
+                            <button
+                              onClick={() => setDeletingQuiz(quiz)}
+                              className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
+                              title="Delete Quiz"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
