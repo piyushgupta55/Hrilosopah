@@ -47,14 +47,20 @@ const FALLBACK_QUIZZES: Record<string, any> = {
   },
 };
 
+import { translateQuestionData } from '@/lib/translator';
+
 export async function GET(request: Request, { params }: { params: { quizSlug: string } }) {
   try {
+    const { searchParams } = new URL(request.url);
+    const locale = searchParams.get('locale') || 'en';
+
     const quiz = await prisma.quiz.findFirst({
       where: { slug: params.quizSlug, isActive: true },
       include: {
         questions: {
           where: { status: 'approved' },
           orderBy: { order: 'asc' },
+          include: { translations: true },
         },
       },
     });
@@ -67,14 +73,16 @@ export async function GET(request: Request, { params }: { params: { quizSlug: st
         } catch {
           parsedOptions = [];
         }
-        return {
+        const baseQ = {
           id: q.id,
           text: q.text,
           options: parsedOptions,
           correctOptionIndex: typeof q.correctOptionIndex === 'number' ? q.correctOptionIndex : 0,
           explanation: q.explanation || null,
           difficulty: q.difficulty,
+          translations: q.translations,
         };
+        return translateQuestionData(baseQ, locale);
       });
 
       return NextResponse.json({

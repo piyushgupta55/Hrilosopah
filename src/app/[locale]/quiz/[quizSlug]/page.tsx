@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { QuizDetailWrapper } from '@/components/quiz/QuizDetailWrapper';
 import { prisma } from '@/lib/prisma';
+import { translateQuestionData } from '@/lib/translator';
 
 import { Clock } from 'lucide-react';
 import Link from 'next/link';
@@ -46,7 +47,7 @@ export default async function QuizPage({
     );
   }
 
-  // 2. Prepare safe questions
+  // 2. Prepare safe questions in target locale
   const safeQuestions = quiz.questions.map((q) => {
     let parsedOptions: string[] = [];
     try {
@@ -54,12 +55,15 @@ export default async function QuizPage({
     } catch {
       parsedOptions = [];
     }
-    return {
+    const baseQ = {
       id: q.id,
       text: q.text,
       options: parsedOptions,
+      explanation: q.explanation,
+      correctOptionIndex: q.correctOptionIndex,
       difficulty: q.difficulty,
     };
+    return translateQuestionData(baseQ, params.locale);
   });
 
   const quizTitle =

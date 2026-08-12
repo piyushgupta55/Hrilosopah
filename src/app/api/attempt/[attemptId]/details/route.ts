@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { translateQuestionData } from '@/lib/translator';
 
 export async function GET(request: Request, { params }: { params: { attemptId: string } }) {
   try {
+    const { searchParams } = new URL(request.url);
+    const locale = searchParams.get('locale') || 'en';
+
     const attempt = await prisma.attempt.findUnique({
       where: { id: params.attemptId },
       include: {
@@ -10,6 +14,7 @@ export async function GET(request: Request, { params }: { params: { attemptId: s
           include: {
             questions: {
               orderBy: { order: 'asc' },
+              include: { translations: true },
             },
             translations: true,
           },
@@ -55,13 +60,15 @@ export async function GET(request: Request, { params }: { params: { attemptId: s
           } catch {
             opts = [];
           }
-          return {
+          const baseQ = {
             id: q.id,
             text: q.text,
             options: opts,
             correctOptionIndex: q.correctOptionIndex,
             explanation: q.explanation || '',
+            translations: (q as any).translations,
           };
+          return translateQuestionData(baseQ, locale);
         }),
       },
     });

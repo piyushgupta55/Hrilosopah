@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useSearchParams } from 'next/navigation';
+import { translateQuestionData } from '@/lib/translator';
 import {
   ArrowLeft,
   CheckCircle2,
@@ -362,7 +363,7 @@ export default function QuizResultsPage() {
               }
             }
 
-            return {
+            const baseQ = {
               id: q.id || `q_${idx}`,
               text: q.text,
               options: parsedOpts,
@@ -371,6 +372,8 @@ export default function QuizResultsPage() {
               userChosenIdx: chosenIdx,
               isCorrect,
             };
+
+            return translateQuestionData(baseQ, locale);
           }
         );
 
