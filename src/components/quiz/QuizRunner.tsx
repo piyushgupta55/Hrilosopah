@@ -17,9 +17,10 @@ type QuizRunnerProps = {
   quizSlug: string;
   attemptId: string;
   questions: Question[];
+  locale?: string;
 };
 
-export const QuizRunner = ({ quizSlug, attemptId, questions }: QuizRunnerProps) => {
+export const QuizRunner = ({ quizSlug, attemptId, questions, locale = 'en' }: QuizRunnerProps) => {
   const t = useTranslations('Quiz');
   const router = useRouter();
 
@@ -61,7 +62,14 @@ export const QuizRunner = ({ quizSlug, attemptId, questions }: QuizRunnerProps) 
       const data = await res.json();
 
       if (data.success) {
-        router.push(`/en/quiz/${quizSlug}/summary?attemptId=${attemptId}`);
+        if (typeof window !== 'undefined') {
+          try {
+            sessionStorage.setItem(`attempt_${attemptId}_answers`, JSON.stringify(answers));
+          } catch (e) {
+            console.error('Failed to store answers in sessionStorage', e);
+          }
+        }
+        router.push(`/${locale}/quiz/${quizSlug}/summary?attemptId=${attemptId}`);
       } else {
         setError(data.error?.message || t('error'));
         setIsSubmitting(false);

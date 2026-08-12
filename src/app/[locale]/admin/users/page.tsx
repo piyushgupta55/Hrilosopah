@@ -1,111 +1,138 @@
-import React from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Shield, Users, Search, Mail, ShieldCheck } from 'lucide-react';
-import { prisma } from '@/lib/prisma';
+import { useParams } from 'next/navigation';
+import {
+  Shield,
+  Users,
+  Search,
+  Mail,
+  Filter,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+  UserCheck,
+  UserX,
+  Zap,
+  Flame,
+  Globe,
+} from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+export interface UserAdminItem {
+  id: string;
+  name: string;
+  email: string;
+  createdAt: string;
+  currentStreak: number;
+  longestStreak: number;
+  xp: number;
+  language: string;
+  status: 'Active' | 'Suspended' | string;
+  attemptsCount: number;
+}
 
-export default async function AdminUsersPage({
-  params: { locale },
-}: {
-  params: { locale: string };
-}) {
-  let dbUsers: Array<{
-    id: string;
-    email: string | null;
-    name: string | null;
-    role?: string;
-    createdAt: Date;
-    _count?: { attempts: number };
-  }> = [];
+export default function AdminUsersPage() {
+  const params = useParams() || {};
+  const locale = (params.locale as string) || 'en';
 
-  try {
-    const rawUsers = await prisma.user.findMany({
-      take: 50,
-      orderBy: { createdAt: 'desc' },
-    });
+  const [users, setUsers] = useState<UserAdminItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string>('');
 
-    dbUsers = rawUsers.map((u) => ({
-      id: u.id,
-      email: u.email,
-      name: u.name || u.email?.split('@')[0] || 'Learner',
-      role: (u as any).role || 'User',
-      createdAt: u.createdAt,
-      _count: (u as any)._count || { attempts: 0 },
-    }));
-  } catch (err) {
-    console.error('Error querying users from DB:', err);
-  }
+  // Filters
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
 
-  // Fallback sample user list if database user table is empty
-  if (!dbUsers || dbUsers.length === 0) {
-    dbUsers = [
-      {
-        id: 'usr_1',
-        email: 'piyush@example.com',
-        name: 'Piyush Sharma',
-        role: 'Learner',
-        createdAt: new Date(),
-        _count: { attempts: 8 },
-      },
-      {
-        id: 'usr_2',
-        email: 'alex@example.com',
-        name: 'Alex Johnson',
-        role: 'Learner',
-        createdAt: new Date(Date.now() - 86400000),
-        _count: { attempts: 5 },
-      },
-      {
-        id: 'usr_3',
-        email: 'admin@hrilosopah.com',
-        name: 'System Admin',
-        role: 'Admin',
-        createdAt: new Date(Date.now() - 172800000),
-        _count: { attempts: 12 },
-      },
-      {
-        id: 'usr_4',
-        email: 'sarah@example.com',
-        name: 'Sarah Miller',
-        role: 'Learner',
-        createdAt: new Date(Date.now() - 259200000),
-        _count: { attempts: 3 },
-      },
-    ];
-  }
+  // Pagination (25 users per page)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const itemsPerPage = 25;
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/admin/users', { cache: 'no-store' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to fetch learners');
+      setUsers(data.users || []);
+    } catch (err: any) {
+      console.error('Fetch learners error:', err);
+      setError(err.message || 'Failed to load learners from database.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  // Filter logic
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === 'all' || u.status.toLowerCase() === statusFilter.toLowerCase();
+
+    return matchesSearch && matchesStatus;
+  });
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+  const formatDate = (isoString: string) => {
+    try {
+      return new Date(isoString).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return isoString;
+    }
+  };
 
   const adminNav = [
     { label: 'Overview', href: `/${locale}/admin/dashboard`, active: false },
     { label: 'Quizzes', href: `/${locale}/admin/quizzes`, active: false },
-    { label: 'Questions', href: `/${locale}/admin/questions`, active: false },
-    { label: 'Users', href: `/${locale}/admin/users`, active: true },
+    { label: 'Learners & Moderation', href: `/${locale}/admin/users`, active: true },
     { label: 'Payments ($1)', href: `/${locale}/admin/payments`, active: false },
   ];
 
   return (
     <div className="w-full min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col font-sans">
       {/* Header */}
-      <header className="w-full border-b border-blue-100 bg-white/95 backdrop-blur-lg px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
+      <header className="w-full border-b border-blue-100 bg-white/95 backdrop-blur-lg px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-40 shadow-sm">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-50 border border-blue-200 rounded-xl flex items-center justify-center text-[#2563EB]">
             <Shield className="w-5 h-5" />
           </div>
           <div>
             <h1 className="font-black text-base sm:text-lg text-slate-900">
-              User Management Table
+              Learner Moderation & Support
             </h1>
             <span className="text-[11px] text-slate-500 font-semibold">
-              Registered Learners & Admins ({dbUsers.length})
+              Manage platform learners, streaks & account statuses
             </span>
           </div>
         </div>
-        <Link
-          href={`/${locale}/admin/dashboard`}
-          className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-blue-50 text-xs sm:text-sm font-extrabold text-slate-700 hover:text-[#2563EB] border border-slate-200 transition-colors"
-        >
-          Back to Dashboard
-        </Link>
+
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={fetchUsers}
+            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors"
+            title="Refresh Users List"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </header>
 
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-8 space-y-6">
@@ -126,77 +153,211 @@ export default async function AdminUsersPage({
           ))}
         </div>
 
-        {/* User Table Card */}
-        <div className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 sm:p-5 border-b border-gray-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <h3 className="font-black text-base text-slate-900 flex items-center gap-2">
-              <Users className="w-5 h-5 text-[#2563EB]" />
-              Database Registered Users
-            </h3>
-
-            <div className="relative w-full sm:w-72">
+        {/* Filter Controls Bar */}
+        <div className="bg-white border border-blue-100 rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Search Bar */}
+            <div className="relative sm:col-span-2">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search by name or email..."
-                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                placeholder="Search learner by name or email..."
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
               />
             </div>
+
+            {/* Status Dropdown Filter */}
+            <div className="relative">
+              <select
+                value={statusFilter}
+                onChange={(e) => {
+                  setStatusFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-800 font-medium focus:outline-none focus:border-[#2563EB] appearance-none"
+              >
+                <option value="all">All Account Statuses</option>
+                <option value="active">Active Only</option>
+                <option value="suspended">Suspended Only</option>
+              </select>
+              <Filter className="w-3.5 h-3.5 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* User Table Card */}
+        <div className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
+          {/* Table Header Summary */}
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+              <Users className="w-4 h-4 text-[#2563EB]" />
+              <span>Learners Directory</span>
+              <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                {filteredUsers.length} total
+              </span>
+            </h3>
+            <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+              Page {currentPage} of {totalPages}
+            </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
-                <tr>
-                  <th className="p-4 sm:p-5">User Profile</th>
-                  <th className="p-4 sm:p-5">Email Address</th>
-                  <th className="p-4 sm:p-5">Role</th>
-                  <th className="p-4 sm:p-5">Quizzes Played</th>
-                  <th className="p-4 sm:p-5">Joined Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100 font-medium">
-                {dbUsers.map((u) => (
-                  <tr key={u.id} className="hover:bg-blue-50/50 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-slate-900 flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#2563EB] font-black text-sm shrink-0">
-                        {(u.name || 'L').charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <span className="block">{u.name}</span>
-                        <span className="text-[10px] text-slate-400 font-normal">
-                          ID: {u.id.substring(0, 8)}...
-                        </span>
-                      </div>
-                    </td>
-                    <td className="p-4 sm:p-5 text-slate-600">
-                      <span className="flex items-center gap-1.5">
-                        <Mail className="w-3.5 h-3.5 text-slate-400" />
-                        {u.email || 'Anonymous'}
-                      </span>
-                    </td>
-                    <td className="p-4 sm:p-5">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-extrabold border ${
-                          u.role === 'Admin'
-                            ? 'bg-purple-50 text-purple-600 border-purple-200'
-                            : 'bg-blue-50 text-[#2563EB] border-blue-100'
-                        }`}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="p-4 sm:p-5 text-slate-900 font-black">
-                      {u._count?.attempts || 0} Quizzes
-                    </td>
-                    <td className="p-4 sm:p-5 text-slate-500">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
+          {/* Loading Skeleton */}
+          {loading ? (
+            <div className="p-8 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-12 bg-slate-100 animate-pulse rounded-xl" />
+              ))}
+            </div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-600 font-semibold text-sm">{error}</div>
+          ) : filteredUsers.length === 0 ? (
+            /* Empty State */
+            <div className="p-12 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-[#2563EB] flex items-center justify-center mx-auto border border-blue-100">
+                <Users className="w-6 h-6" />
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-base">No Learners Found</h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                No users match your search query or filter criteria. Try clearing search parameters.
+              </p>
+            </div>
+          ) : (
+            /* Main Table */
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs sm:text-sm">
+                <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-slate-100">
+                  <tr>
+                    <th className="p-4 sm:p-5">Name / Email</th>
+                    <th className="p-4 sm:p-5">Joined Date</th>
+                    <th className="p-4 sm:p-5">Streak</th>
+                    <th className="p-4 sm:p-5">Total XP</th>
+                    <th className="p-4 sm:p-5">Language</th>
+                    <th className="p-4 sm:p-5">Status</th>
+                    <th className="p-4 sm:p-5 text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium">
+                  {paginatedUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-blue-50/40 transition-colors">
+                      {/* Name / Email Column */}
+                      <td className="p-4 sm:p-5 font-bold text-slate-900">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#2563EB] font-black text-sm shrink-0">
+                            {(u.name || 'L').charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <span className="block text-slate-900 font-extrabold">{u.name}</span>
+                            <span className="text-xs text-slate-500 font-normal flex items-center gap-1">
+                              <Mail className="w-3 h-3 text-slate-400" />
+                              {u.email}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Signup Date */}
+                      <td className="p-4 sm:p-5 text-slate-600 font-medium">
+                        {formatDate(u.createdAt)}
+                      </td>
+
+                      {/* Current Streak */}
+                      <td className="p-4 sm:p-5">
+                        <div className="flex items-center gap-1 text-amber-600 font-black text-xs">
+                          <Flame className="w-4 h-4 fill-amber-500 text-amber-500" />
+                          <span>{u.currentStreak} Days</span>
+                        </div>
+                      </td>
+
+                      {/* Total XP */}
+                      <td className="p-4 sm:p-5">
+                        <div className="flex items-center gap-1 text-purple-600 font-black text-xs">
+                          <Zap className="w-4 h-4 fill-purple-500 text-purple-500" />
+                          <span>{u.xp.toLocaleString()} XP</span>
+                        </div>
+                      </td>
+
+                      {/* Language */}
+                      <td className="p-4 sm:p-5 text-slate-600">
+                        <div className="flex items-center gap-1">
+                          <Globe className="w-3.5 h-3.5 text-slate-400" />
+                          <span>{u.language}</span>
+                        </div>
+                      </td>
+
+                      {/* Account Status */}
+                      <td className="p-4 sm:p-5">
+                        <span
+                          className={`px-2.5 py-1 rounded-full text-xs font-extrabold border flex items-center gap-1 w-fit ${
+                            u.status === 'Active'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                              : 'bg-red-50 text-red-700 border-red-200'
+                          }`}
+                        >
+                          {u.status === 'Active' ? (
+                            <UserCheck className="w-3 h-3 text-emerald-600" />
+                          ) : (
+                            <UserX className="w-3 h-3 text-red-600" />
+                          )}
+                          <span>{u.status}</span>
+                        </span>
+                      </td>
+
+                      {/* View Action */}
+                      <td className="p-4 sm:p-5 text-right">
+                        <Link
+                          href={`/${locale}/admin/users/${u.id}`}
+                          className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] font-extrabold text-xs rounded-xl border border-slate-200 transition-all inline-flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View Profile</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Pagination Bar */}
+          {!loading && filteredUsers.length > 0 && totalPages > 1 && (
+            <div className="p-4 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
+              <span className="text-xs text-slate-500 font-semibold">
+                Showing {startIndex + 1} to{' '}
+                {Math.min(startIndex + itemsPerPage, filteredUsers.length)} of{' '}
+                {filteredUsers.length} learners
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-30 text-slate-700 font-bold transition-all"
+                  title="Previous Page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <span className="text-xs font-extrabold text-slate-800 px-2">
+                  {currentPage} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 disabled:opacity-30 text-slate-700 font-bold transition-all"
+                  title="Next Page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

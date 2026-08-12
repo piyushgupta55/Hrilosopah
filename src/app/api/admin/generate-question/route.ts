@@ -1,13 +1,44 @@
 import { NextResponse } from 'next/server';
 
+function randomizeCorrectOption(optionsArr: string[], originalCorrectIdx: number) {
+  if (!optionsArr || optionsArr.length <= 1) return { options: optionsArr, correctIdx: 0 };
+
+  const safeIdx = Math.max(0, Math.min(originalCorrectIdx, optionsArr.length - 1));
+  const correctOptionText = optionsArr[safeIdx];
+
+  // Pick a random target index for the correct answer
+  const randomTargetIdx = Math.floor(Math.random() * optionsArr.length);
+
+  const newOpts = [...optionsArr];
+  const temp = newOpts[randomTargetIdx];
+  newOpts[randomTargetIdx] = correctOptionText;
+  newOpts[safeIdx] = temp;
+
+  return { options: newOpts, correctIdx: randomTargetIdx };
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { topic, category = 'AI', difficulty = 'beginner', apiKey } = body;
+    const {
+      topic,
+      category = 'AI',
+      difficulty = 'beginner',
+      questionType = 'single-choice',
+      count = 1,
+      optionsCount = 4,
+      apiKey,
+    } = body;
+    const numQuestions = Math.min(Math.max(1, Number(count) || 1), 50);
+    const numOptions = Math.min(Math.max(2, Number(optionsCount) || 4), 6);
 
-    const key = apiKey || process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY;
+    const effectiveKey =
+      apiKey ||
+      process.env.AI_GATEWAY_API_KEY ||
+      process.env.OPENAI_API_KEY ||
+      process.env.GEMINI_API_KEY;
 
-    // AI & Crypto Topic pools by category
+    // Category Topic pools
     const categoryTopics: Record<string, string[]> = {
       AI: [
         'Transformer Self-Attention Mechanisms',
@@ -25,19 +56,27 @@ export async function POST(req: Request) {
         'Decentralized Finance (DeFi) Automated Market Makers',
         'Layer 2 Rollups (Optimistic & ZK Rollups)',
       ],
+      Python: [
+        'Python Recursion and Base Case Output',
+        'List Comprehension vs Generator Expressions',
+        'Decorators and Function Wrapper Arguments',
+        'Global Interpreter Lock (GIL) and Multithreading',
+        'Dictionary Merging and Unpacking Operators',
+      ],
+      Coding: [
+        'Data Structures: Array vs Linked List Complexity',
+        'Binary Search Algorithm Time Complexity',
+        'Recursion Call Stack and Stack Overflow',
+        'Object-Oriented Programming Polymorphism & Encapsulation',
+        'Asynchronous Event Loop and Promises',
+      ],
     };
 
-    const topicsForCat = categoryTopics[category] || categoryTopics.AI;
+    const topicsForCat = categoryTopics[category] || categoryTopics.Coding || categoryTopics.AI;
     const selectedTopic =
       topic && topic.trim().length > 0
         ? topic.trim()
         : topicsForCat[Math.floor(Math.random() * topicsForCat.length)];
-
-    const effectiveKey =
-      apiKey ||
-      process.env.AI_GATEWAY_API_KEY ||
-      process.env.OPENAI_API_KEY ||
-      process.env.GEMINI_API_KEY;
 
     // If an AI API Key (OpenAI sk- or Vercel AI Gateway vck_) is present, call live AI Gateway endpoint
     if (effectiveKey && effectiveKey.trim().length > 0) {
@@ -48,6 +87,9 @@ export async function POST(req: Request) {
           : 'https://api.openai.com/v1/chat/completions';
         const model = isVercelGateway ? 'openai/gpt-4o-mini' : 'gpt-4o-mini';
 
+        const systemPrompt = `You are an expert Programming & Quiz question creator. Return JSON only with key "questions" containing an array of ${numQuestions} objects. Each question object must have: text (string, can include code snippets), questionType ("single-choice" or "multi-choice"), options (array of exactly ${numOptions} strings), correctOptionIndex (integer from 0 to ${numOptions - 1}), correctIndexes (array of integers), difficulty (string), explanation (string). Make sure to vary correct answer placement randomly across option indices.`;
+        const userPrompt = `Generate ${numQuestions} high-quality ${difficulty} level ${category} quiz questions (${questionType} format) with exactly ${numOptions} answer options per question, specifically based on this topic/prompt: "${selectedTopic}". Return JSON object {"questions": [...]}.`;
+
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: {
@@ -57,15 +99,8 @@ export async function POST(req: Request) {
           body: JSON.stringify({
             model,
             messages: [
-              {
-                role: 'system',
-                content:
-                  'You are an expert AI & Cryptocurrency quiz question creator. Return JSON only with fields: text (string), options (array of 4 strings), correctOptionIndex (0-3 integer), difficulty (string), explanation (string).',
-              },
-              {
-                role: 'user',
-                content: `Generate a high-quality ${difficulty} level ${category} quiz question specifically about ${selectedTopic}. Return valid JSON object with keys: "text", "options", "correctOptionIndex", "difficulty", "explanation".`,
-              },
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
             ],
             response_format: { type: 'json_object' },
             temperature: 0.7,
@@ -83,9 +118,40 @@ export async function POST(req: Request) {
                 .trim();
             }
             const aiContent = JSON.parse(rawContent);
+            const qList = Array.isArray(aiContent.questions)
+              ? aiContent.questions
+              : aiContent.text
+                ? [aiContent]
+                : [];
+            const formatted = qList.map((q: any) => {
+              const origOpts =
+                Array.isArray(q.options) && q.options.length >= 2 ? q.options : ['', ''];
+              const origCorrect =
+                typeof q.correctOptionIndex === 'number' ? q.correctOptionIndex : 0;
+              const { options: shuffledOpts, correctIdx: randCorrectIdx } = randomizeCorrectOption(
+                origOpts,
+                origCorrect
+              );
+
+              return {
+                text: q.text,
+                questionType: q.questionType || questionType || 'single-choice',
+                options: shuffledOpts,
+                correctOptionIndex: randCorrectIdx,
+                correctIndexes:
+                  Array.isArray(q.correctIndexes) && q.correctIndexes.length > 0
+                    ? q.correctIndexes.map((idx: number) =>
+                        idx === origCorrect ? randCorrectIdx : idx
+                      )
+                    : [randCorrectIdx],
+                explanation: q.explanation || '',
+                difficulty: q.difficulty || difficulty,
+              };
+            });
             return NextResponse.json({
               success: true,
-              question: { ...aiContent, category, difficulty },
+              questions: formatted,
+              question: formatted[0],
             });
           }
         } else {
@@ -98,6 +164,34 @@ export async function POST(req: Request) {
     }
 
     // Built-in Intelligent AI Engine Question Generator Fallback categorized by topic
+    const codingQuestions = [
+      {
+        text: 'What is the output of the following Python code snippet?\n\ndef compute(n):\n    if n <= 1: return 1\n    return n * compute(n - 1)\n\nprint(compute(4))',
+        options: ['24', '12', '4', 'RecursionError'],
+        correctOptionIndex: 0,
+        explanation:
+          'compute(4) computes 4 * 3 * 2 * 1 = 24 using recursive factorial multiplication.',
+      },
+      {
+        text: 'Which data structure offers O(1) average time complexity for key lookups and insertions?',
+        options: [
+          'Hash Table / Hash Map',
+          'Binary Search Tree',
+          'Sorted Array',
+          'Singly Linked List',
+        ],
+        correctOptionIndex: 0,
+        explanation:
+          'Hash Tables compute direct index mappings using hash functions, offering O(1) average lookup and insertion time.',
+      },
+      {
+        text: 'In Python, what does a list comprehension like [x**2 for x in range(5) if x % 2 == 0] evaluate to?',
+        options: ['[0, 4, 16]', '[1, 9, 25]', '[0, 1, 4, 9, 16]', '[0, 2, 4]'],
+        correctOptionIndex: 0,
+        explanation: 'Even numbers in range(5) are 0, 2, 4. Squaring them yields [0, 4, 16].',
+      },
+    ];
+
     const aiQuestions = [
       {
         text: 'What is the main advantage of Multi-Head Self-Attention in Transformer models?',
@@ -176,19 +270,56 @@ export async function POST(req: Request) {
       },
     ];
 
-    const pool = category.toLowerCase() === 'crypto' ? cryptoQuestions : aiQuestions;
-    const qChoice = pool[Math.floor(Math.random() * pool.length)];
+    const catLower = category.toLowerCase();
+    const pool =
+      catLower === 'crypto'
+        ? cryptoQuestions
+        : catLower === 'coding' || catLower === 'python'
+          ? codingQuestions
+          : aiQuestions;
 
-    return NextResponse.json({
-      success: true,
-      question: {
-        text: topic ? `Regarding ${selectedTopic}: ${qChoice.text}` : qChoice.text,
-        options: qChoice.options,
-        correctOptionIndex: qChoice.correctOptionIndex,
+    const generatedQuestions: any[] = [];
+    for (let i = 0; i < numQuestions; i++) {
+      const qChoice = pool[i % pool.length];
+      const slicedOpts = qChoice.options.slice(0, numOptions);
+      while (slicedOpts.length < numOptions) {
+        slicedOpts.push(`Option ${String.fromCharCode(65 + slicedOpts.length)}`);
+      }
+      const initialCorrectIdx = qChoice.correctOptionIndex ?? 0;
+      const { options: finalOptions, correctIdx: finalCorrectIdx } = randomizeCorrectOption(
+        slicedOpts,
+        initialCorrectIdx
+      );
+
+      const targetQType =
+        questionType === 'mixed'
+          ? i % 2 === 0
+            ? 'single-choice'
+            : 'multi-choice'
+          : questionType || 'single-choice';
+
+      let correctIndexes: number[] = [finalCorrectIdx];
+      if (targetQType === 'multi-choice') {
+        const secondIdx = (finalCorrectIdx + 1) % finalOptions.length;
+        correctIndexes = Array.from(new Set([finalCorrectIdx, secondIdx])).sort((a, b) => a - b);
+      }
+
+      generatedQuestions.push({
+        text: qChoice.text,
+        questionType: targetQType,
+        options: finalOptions,
+        correctOptionIndex: targetQType === 'multi-choice' ? -1 : finalCorrectIdx,
+        correctIndexes,
         explanation: qChoice.explanation,
         category,
         difficulty,
-      },
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      questions: generatedQuestions,
+      question: generatedQuestions[0],
     });
   } catch (error: any) {
     console.error('Error generating AI question:', error);

@@ -16,39 +16,54 @@ export default async function QuizPage({
   const quiz = await prisma.quiz.findFirst({
     where: { slug: params.quizSlug, isActive: true },
     include: {
-      questions: {
-        where: { status: 'approved' },
-      },
+      questions: true,
+      translations: true,
     },
   });
 
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>No questions available for this quiz.</p>
+      <div className="min-h-screen flex items-center justify-center p-6 text-center">
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Quiz Questions Coming Soon</h2>
+          <p className="text-sm text-slate-500">
+            No questions have been published for this quiz yet.
+          </p>
+        </div>
       </div>
     );
   }
 
-  // 2. Prepare safe questions (same as API route)
-  const shuffledQuestions = [...quiz.questions].sort(() => 0.5 - Math.random()).slice(0, 15);
-  const safeQuestions = shuffledQuestions.map((q) => ({
-    id: q.id,
-    text: q.text,
-    options: JSON.parse(q.options),
-    difficulty: q.difficulty,
-  }));
+  // 2. Prepare safe questions
+  const safeQuestions = quiz.questions.map((q) => {
+    let parsedOptions: string[] = [];
+    try {
+      parsedOptions = typeof q.options === 'string' ? JSON.parse(q.options) : q.options || [];
+    } catch {
+      parsedOptions = [];
+    }
+    return {
+      id: q.id,
+      text: q.text,
+      options: parsedOptions,
+      difficulty: q.difficulty,
+    };
+  });
+
+  const quizTitle =
+    quiz.translations?.[0]?.title ||
+    quiz.slug
+      .split('-')
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(' ');
 
   const quizData = {
     id: quiz.id,
     slug: quiz.slug,
     category: quiz.category,
-    // Add missing title/description if available (from translations) or fallback
-    title: quiz.category === 'crypto' ? 'Crypto Basics' : 'AI Fundamentals',
-    description:
-      quiz.category === 'crypto'
-        ? 'Master the core concepts of cryptocurrency and blockchain technology.'
-        : "Learn the basic concepts of Artificial Intelligence and how it's shaping the future.",
+    difficulty: quiz.difficulty || 'beginner',
+    title: quizTitle,
+    description: `Test your knowledge in ${quiz.category} with interactive questions.`,
     questions: safeQuestions,
   };
 

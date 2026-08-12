@@ -1,11 +1,35 @@
 import React from 'react';
 import Link from 'next/link';
 import { BottomNav } from '@/components/home/BottomNav';
-import { Zap, Clock, HelpCircle, Gift, Brain, Bot, Bitcoin } from 'lucide-react';
+import { Zap, Clock, HelpCircle, Gift, Brain, Bot, Bitcoin, Code, BookOpen } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+
+const cardGradients = [
+  'from-purple-600 to-indigo-600',
+  'from-blue-500 to-cyan-600',
+  'from-emerald-500 to-teal-600',
+  'from-violet-500 to-purple-600',
+  'from-amber-500 to-orange-600',
+  'from-rose-500 to-pink-600',
+];
+
+const getCategoryIcon = (category: string, title: string) => {
+  const text = `${category} ${title}`.toLowerCase();
+  if (text.includes('crypto') || text.includes('bitcoin') || text.includes('block')) return Bitcoin;
+  if (
+    text.includes('code') ||
+    text.includes('python') ||
+    text.includes('js') ||
+    text.includes('web')
+  )
+    return Code;
+  if (text.includes('machine') || text.includes('ml') || text.includes('bot')) return Bot;
+  if (text.includes('ai') || text.includes('intel') || text.includes('gpt')) return Brain;
+  return BookOpen;
+};
 
 export default async function PlayPage({ params: { locale } }: { params: { locale: string } }) {
   const session = await getServerSession(authOptions);
@@ -23,6 +47,20 @@ export default async function PlayPage({ params: { locale } }: { params: { local
       })
     : [];
 
+  // Fetch all active/published quizzes from DB
+  const dbQuizzes = await prisma.quiz.findMany({
+    where: {
+      isActive: true,
+    },
+    include: {
+      questions: true,
+      translations: true,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
   const completedTodayCount = userAttempts.filter((a) => {
     if (!a.completedAt) return false;
     const d = new Date(a.completedAt);
@@ -34,21 +72,17 @@ export default async function PlayPage({ params: { locale } }: { params: { local
     );
   }).length;
 
-  const getQuizProgress = (slug: string) => {
+  const getQuizProgress = (slug: string, totalQuestionsCount: number = 15) => {
     const attemptsForQuiz = userAttempts.filter((a) => a.quiz?.slug === slug);
-    if (attemptsForQuiz.length === 0) return { score: 0, total: 15, pct: 0 };
+    if (attemptsForQuiz.length === 0) return { score: 0, total: totalQuestionsCount, pct: 0 };
     const bestAttempt = attemptsForQuiz.reduce((max, curr) =>
       (curr.score || 0) > (max.score || 0) ? curr : max
     );
     const score = bestAttempt.score || 0;
-    const total = bestAttempt.totalQuestions || 15;
+    const total = bestAttempt.totalQuestions || totalQuestionsCount || 15;
     const pct = Math.round((score / total) * 100);
     return { score, total, pct };
   };
-
-  const aiProgress = getQuizProgress('ai-awareness');
-  const cryptoProgress = getQuizProgress('crypto-basics');
-  const mlProgress = getQuizProgress('ml-fundamentals');
 
   const t = await getTranslations('Play');
   const tHome = await getTranslations('Home');
@@ -80,91 +114,55 @@ export default async function PlayPage({ params: { locale } }: { params: { local
 
         <div className="w-full overflow-x-auto no-scrollbar pl-5 pr-5 pb-2">
           <div className="flex items-center gap-4">
-            {/* Card 1 */}
-            <Link href={`/${locale}/quiz/ai-awareness`}>
-              <div className="w-40 h-56 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0">
-                <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-4">
-                  {tCards('level', { num: 1 })}
-                </div>
-                <Brain
-                  className="w-12 h-12 self-center mb-4 mt-2 text-white/90 drop-shadow-sm"
-                  strokeWidth={1.5}
-                />
-                <h4 className="font-bold text-sm leading-tight mt-auto mb-3">
-                  {tCards('aiAwareness')}
-                </h4>
-                <div className="w-full">
-                  <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>
-                      {aiProgress.score} / {aiProgress.total}
-                    </span>
-                  </div>
-                  <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full"
-                      style={{ width: `${aiProgress.pct}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            {dbQuizzes.map((quiz, idx) => {
+              const IconComp = getCategoryIcon(quiz.category, quiz.slug);
+              const gradient = cardGradients[idx % cardGradients.length];
+              const displayTitle =
+                quiz.translations?.[0]?.title ||
+                quiz.slug
+                  .split('-')
+                  .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                  .join(' ');
 
-            {/* Card 2 */}
-            <Link href={`/${locale}/quiz/crypto-basics`}>
-              <div className="w-40 h-56 rounded-xl bg-gradient-to-br from-blue-400 to-blue-600 p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0">
-                <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-4">
-                  {tCards('level', { num: 1 })}
-                </div>
-                <div className="self-center mb-4 mt-2 flex items-center justify-center">
-                  <Bitcoin className="w-14 h-14 text-white" strokeWidth={1.8} />
-                </div>
-                <h4 className="font-bold text-sm leading-tight mt-auto mb-3">
-                  {tCards('cryptoBasics')}
-                </h4>
-                <div className="w-full">
-                  <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>
-                      {cryptoProgress.score} / {cryptoProgress.total}
-                    </span>
-                  </div>
-                  <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full"
-                      style={{ width: `${cryptoProgress.pct}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+              const totalQs = quiz.questions?.length || 10;
+              const prog = getQuizProgress(quiz.slug, totalQs);
+              const levelNum =
+                quiz.difficulty === 'advanced' ? 3 : quiz.difficulty === 'intermediate' ? 2 : 1;
 
-            {/* Card 3 */}
-            <Link href={`/${locale}/quiz/ml-fundamentals`}>
-              <div className="w-40 h-56 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600 p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0">
-                <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-4">
-                  {tCards('level', { num: 2 })}
-                </div>
-                <Bot
-                  className="w-12 h-12 self-center mb-4 mt-2 text-white/90 drop-shadow-sm"
-                  strokeWidth={1.5}
-                />
-                <h4 className="font-bold text-sm leading-tight mt-auto mb-3">
-                  {tCards('mlFundamentals')}
-                </h4>
-                <div className="w-full">
-                  <div className="flex justify-between items-center text-[10px] font-semibold mb-1.5 text-white/90">
-                    <span>
-                      {mlProgress.score} / {mlProgress.total}
-                    </span>
+              return (
+                <Link key={quiz.id} href={`/${locale}/quiz/${quiz.slug}`}>
+                  <div
+                    className={`w-44 h-60 rounded-2xl bg-gradient-to-br ${gradient} p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0 hover:shadow-lg transition-all hover:-translate-y-0.5`}
+                  >
+                    <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-3">
+                      {tCards('level', { num: levelNum })}
+                    </div>
+                    <div className="self-center mb-3 mt-1 flex items-center justify-center">
+                      <IconComp
+                        className="w-12 h-12 text-white/90 drop-shadow-sm"
+                        strokeWidth={1.5}
+                      />
+                    </div>
+                    <h4 className="font-extrabold text-sm leading-tight mt-auto mb-2 line-clamp-2">
+                      {displayTitle}
+                    </h4>
+                    <div className="w-full">
+                      <div className="flex justify-between items-center text-[10px] font-bold mb-1 text-white/90">
+                        <span>
+                          {prog.score} / {prog.total}
+                        </span>
+                      </div>
+                      <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-white rounded-full transition-all duration-300"
+                          style={{ width: `${prog.pct}%` }}
+                        ></div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-white rounded-full"
-                      style={{ width: `${mlProgress.pct}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>

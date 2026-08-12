@@ -1,184 +1,170 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import {
   ArrowLeft,
   CheckCircle2,
+  XCircle,
   Award,
   BookOpen,
   ChevronDown,
   ChevronUp,
   ShieldCheck,
+  Loader2,
+  Clock,
 } from 'lucide-react';
+
+interface ResultQuestion {
+  id: string;
+  text: string;
+  options: string[];
+  correctOptionIndex: number;
+  explanation: string;
+  userChosenIdx?: number;
+  isCorrect?: boolean;
+}
 
 export default function QuizResultsPage() {
   const params = useParams() || {};
+  const searchParams = useSearchParams();
   const locale = (params.locale as string) || 'en';
+  const quizSlug = (params.quizSlug as string) || '';
+  const attemptId = searchParams.get('attemptId') || '';
 
-  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(0);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [expandedQuestion, setExpandedQuestion] = useState<number | null>(null);
+  const [quizDetails, setQuizDetails] = useState<any>(null);
+  const [evaluatedQuestions, setEvaluatedQuestions] = useState<ResultQuestion[]>([]);
+  const [actualScore, setActualScore] = useState<number>(0);
+  const [totalQs, setTotalQs] = useState<number>(0);
+  const [timeSpentText, setTimeSpentText] = useState<string>('2m 30s');
 
-  const sampleQuestions = [
-    {
-      id: 1,
-      question: 'What is the primary function of a Transformer architecture in AI?',
-      userAnswer: 'Processing sequential data with self-attention mechanisms',
-      correctAnswer: 'Processing sequential data with self-attention mechanisms',
-      isCorrect: true,
-      explanation:
-        'Transformers use self-attention mechanisms to weigh the significance of different words in a sequence simultaneously, making them faster and more effective than traditional RNNs.',
-      topic: 'AI Fundamentals',
-    },
-    {
-      id: 2,
-      question: 'Which component ensures immutability in a blockchain ledger?',
-      userAnswer: 'Cryptographic hashing and consensus algorithms',
-      correctAnswer: 'Cryptographic hashing and consensus algorithms',
-      isCorrect: true,
-      explanation:
-        'Each block contains a cryptographic hash of the previous block. Modifying any past transaction invalidates all subsequent block hashes across network nodes.',
-      topic: 'Blockchain Architecture',
-    },
-    {
-      id: 3,
-      question: 'What is a Zero-Knowledge Proof (ZKP)?',
-      userAnswer: 'A method to prove a statement is true without revealing extra information',
-      correctAnswer: 'A method to prove a statement is true without revealing extra information',
-      isCorrect: true,
-      explanation:
-        'Zero-Knowledge Proofs allow one party (the prover) to prove to another party (the verifier) that a statement is true without disclosing any information beyond the statement validity itself.',
-      topic: 'Cryptography',
-    },
-    {
-      id: 4,
-      question: 'What is the key difference between Supervised and Unsupervised Learning?',
-      userAnswer:
-        'Supervised uses labeled datasets, unsupervised finds hidden patterns in unlabeled data',
-      correctAnswer:
-        'Supervised uses labeled datasets, unsupervised finds hidden patterns in unlabeled data',
-      isCorrect: true,
-      explanation:
-        'Supervised learning relies on ground-truth target labels to train models, whereas unsupervised algorithms discover inherent clusterings and representations in unlabeled data.',
-      topic: 'Machine Learning',
-    },
-    {
-      id: 5,
-      question: 'What is the function of a Smart Contract on Ethereum?',
-      userAnswer: 'Self-executing code stored on the blockchain that runs when conditions are met',
-      correctAnswer:
-        'Self-executing code stored on the blockchain that runs when conditions are met',
-      isCorrect: true,
-      explanation:
-        'Smart contracts are deterministic programs stored on Ethereum Virtual Machine (EVM) nodes that execute automatically without intermediaries.',
-      topic: 'Ethereum & Web3',
-    },
-    {
-      id: 6,
-      question: 'What does RLHF stand for in AI language model training?',
-      userAnswer: 'Reinforcement Learning from Human Feedback',
-      correctAnswer: 'Reinforcement Learning from Human Feedback',
-      isCorrect: true,
-      explanation:
-        'RLHF aligns language model responses with human preferences by training reward models based on human evaluators’ rankings.',
-      topic: 'LLM Fine-tuning',
-    },
-    {
-      id: 7,
-      question: 'What is the Bitcoin halving event?',
-      userAnswer: 'A 50% reduction in the block reward granted to miners every 210,000 blocks',
-      correctAnswer: 'A 50% reduction in the block reward granted to miners every 210,000 blocks',
-      isCorrect: true,
-      explanation:
-        'Occurring approximately every 4 years, halving controls Bitcoin token issuance and enforces its hard cap of 21 million BTC.',
-      topic: 'Bitcoin Economics',
-    },
-    {
-      id: 8,
-      question: 'What is the purpose of Retrieval-Augmented Generation (RAG)?',
-      userAnswer: 'Enhancing LLM responses with external real-time data knowledge bases',
-      correctAnswer: 'Enhancing LLM responses with external real-time data knowledge bases',
-      isCorrect: true,
-      explanation:
-        'RAG combines vector database searches with generative LLMs to provide accurate, up-to-date answers grounded in private data.',
-      topic: 'AI Systems',
-    },
-    {
-      id: 9,
-      question: 'What is Layer-2 scaling in blockchain technology?',
-      userAnswer: 'A secondary protocol built on top of Layer-1 to increase transaction throughput',
-      correctAnswer:
-        'A secondary protocol built on top of Layer-1 to increase transaction throughput',
-      isCorrect: true,
-      explanation:
-        'Layer-2 networks like Arbitrum, Optimism, and Lightning process transactions off-chain to reduce fees while inheriting mainnet security.',
-      topic: 'Scalability',
-    },
-    {
-      id: 10,
-      question: 'What is a Convolutional Neural Network (CNN) primarily used for?',
-      userAnswer: 'Computer vision, image recognition, and visual pattern recognition',
-      correctAnswer: 'Computer vision, image recognition, and visual pattern recognition',
-      isCorrect: true,
-      explanation:
-        'CNNs utilize spatial feature extraction kernels to identify patterns like edges, textures, and objects in image data.',
-      topic: 'Computer Vision',
-    },
-    {
-      id: 11,
-      question: 'What is the role of Proof of Stake (PoS) consensus?',
-      userAnswer:
-        'Validating block creation based on validator staked collateral rather than computation',
-      correctAnswer:
-        'Validating block creation based on validator staked collateral rather than computation',
-      isCorrect: true,
-      explanation:
-        'PoS reduces network energy consumption by over 99% compared to PoW by selecting block creators proportional to their staked tokens.',
-      topic: 'Consensus Mechanisms',
-    },
-    {
-      id: 12,
-      question: 'What is a Vector Database in modern AI stack?',
-      userAnswer:
-        'A database optimized for storing and querying high-dimensional embedding vectors',
-      correctAnswer:
-        'A database optimized for storing and querying high-dimensional embedding vectors',
-      isCorrect: true,
-      explanation:
-        'Vector databases enable semantic similarity search across unstructured data such as text, images, and audio embeddings.',
-      topic: 'AI Infrastructure',
-    },
-    {
-      id: 13,
-      question: 'What is Decentralized Finance (DeFi)?',
-      userAnswer: 'Financial services operating on peer-to-peer smart contracts without banks',
-      correctAnswer: 'Financial services operating on peer-to-peer smart contracts without banks',
-      isCorrect: true,
-      explanation:
-        'DeFi enables lending, borrowing, trading, and yield generation via transparent smart contract protocols.',
-      topic: 'DeFi Applications',
-    },
-    {
-      id: 14,
-      question: 'What is Overfitting in machine learning model development?',
-      userAnswer: 'When a model learns training noise and performs poorly on unseen data',
-      correctAnswer: 'When a model learns training noise and performs poorly on unseen data',
-      isCorrect: true,
-      explanation:
-        'Overfitting occurs when a model fits training samples too tightly, losing generalization capability on validation datasets.',
-      topic: 'Model Optimization',
-    },
-    {
-      id: 15,
-      question: 'What is a Non-Fungible Token (NFT)?',
-      userAnswer: 'A unique digital asset token representing ownership of a specific item',
-      correctAnswer: 'A unique digital asset token representing ownership of a specific item',
-      isCorrect: true,
-      explanation:
-        'Unlike fungible cryptocurrencies, each NFT possesses unique metadata and token IDs certifying verifiable digital ownership.',
-      topic: 'Digital Assets',
-    },
-  ];
+  useEffect(() => {
+    async function loadAttemptResults() {
+      setLoading(true);
+      try {
+        let storedAnswers: Record<string, number> = {};
+        if (typeof window !== 'undefined') {
+          try {
+            if (attemptId) {
+              const raw = sessionStorage.getItem(`attempt_${attemptId}_answers`);
+              if (raw) storedAnswers = JSON.parse(raw);
+            }
+            if (Object.keys(storedAnswers).length === 0) {
+              for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith('attempt_') && key.endsWith('_answers')) {
+                  const raw = sessionStorage.getItem(key);
+                  if (raw) {
+                    storedAnswers = JSON.parse(raw);
+                    break;
+                  }
+                }
+              }
+            }
+          } catch {
+            storedAnswers = {};
+          }
+        }
+
+        let dataToUse: any = null;
+
+        if (attemptId) {
+          const res = await fetch(`/api/attempt/${attemptId}/details`);
+          if (res.ok) {
+            const result = await res.json();
+            if (result.success && result.data) {
+              dataToUse = result.data;
+            }
+          }
+        }
+
+        if (!dataToUse && quizSlug) {
+          const res = await fetch(`/api/admin/quiz?slug=${quizSlug}`);
+          if (res.ok) {
+            const result = await res.json();
+            if (result.quiz) {
+              const quiz = result.quiz;
+              dataToUse = {
+                quizTitle: quiz.title || quizSlug,
+                category: quiz.category,
+                totalQuestions: quiz.questions?.length || 0,
+                score: null,
+                timeSpentFormatted: '2m 15s',
+                questions: quiz.questions || [],
+              };
+            }
+          }
+        }
+
+        if (dataToUse) {
+          setQuizDetails(dataToUse);
+          if (dataToUse.timeSpentFormatted) {
+            setTimeSpentText(dataToUse.timeSpentFormatted);
+          }
+
+          let correctCount = 0;
+          const questionsList: ResultQuestion[] = (dataToUse.questions || []).map((q: any) => {
+            const chosenIdx = storedAnswers[q.id];
+            const isCorrect = typeof chosenIdx === 'number' && chosenIdx === q.correctOptionIndex;
+            if (isCorrect) correctCount++;
+
+            let parsedOpts: string[] = [];
+            if (Array.isArray(q.options)) {
+              parsedOpts = q.options;
+            } else if (typeof q.options === 'string') {
+              try {
+                parsedOpts = JSON.parse(q.options);
+              } catch {
+                parsedOpts = [q.options];
+              }
+            }
+
+            return {
+              id: q.id,
+              text: q.text,
+              options: parsedOpts,
+              correctOptionIndex: q.correctOptionIndex,
+              explanation: q.explanation || '',
+              userChosenIdx: chosenIdx,
+              isCorrect,
+            };
+          });
+
+          setEvaluatedQuestions(questionsList);
+          setTotalQs(dataToUse.totalQuestions || questionsList.length || 0);
+          setActualScore(
+            dataToUse.score !== undefined && dataToUse.score !== null
+              ? dataToUse.score
+              : correctCount
+          );
+        }
+      } catch (err) {
+        console.error('Error loading attempt results:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadAttemptResults();
+  }, [attemptId, quizSlug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen w-full bg-[#F8FAFC] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-[#2563EB] animate-spin" />
+          <p className="text-xs font-extrabold text-slate-600">Calculating your results...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const accuracyPct = totalQs > 0 ? Math.round((actualScore / totalQs) * 100) : 0;
+  const totalPoints = actualScore * 100;
+  const isPerfect = actualScore === totalQs && totalQs > 0;
 
   return (
     <div className="min-h-screen w-full bg-[#F8FAFC] text-slate-900 flex flex-col font-sans relative overflow-x-hidden">
@@ -186,14 +172,20 @@ export default function QuizResultsPage() {
       <header className="w-full border-b border-blue-100 bg-white/90 backdrop-blur-lg px-6 py-4 flex items-center justify-between sticky top-0 z-50 shadow-sm">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 text-slate-600 hover:text-blue-600 transition-colors text-xs font-semibold"
+          className="flex items-center gap-2 text-slate-600 hover:text-[#2563EB] transition-colors text-xs font-semibold"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Home</span>
         </Link>
         <div className="flex items-center gap-2">
-          <span className="px-3 py-1 bg-blue-50 text-[#2563EB] border border-blue-200 text-[11px] font-bold rounded-full">
-            Verified Pass
+          <span
+            className={`px-3 py-1 text-[11px] font-bold rounded-full border ${
+              isPerfect
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                : 'bg-blue-50 text-[#2563EB] border-blue-200'
+            }`}
+          >
+            {isPerfect ? 'Verified Pass' : 'Completed'}
           </span>
         </div>
       </header>
@@ -201,7 +193,13 @@ export default function QuizResultsPage() {
       <div className="flex-1 max-w-3xl w-full mx-auto p-5 space-y-4 pb-14">
         {/* Certificate Hero Badge */}
         <div className="w-full bg-white border border-blue-100 rounded-xl p-5 sm:p-6 shadow-sm relative overflow-hidden flex flex-col items-center text-center">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-tr from-[#2563EB] to-[#60A5FA] flex items-center justify-center shadow-md shadow-blue-500/20 mb-3 text-white">
+          <div
+            className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-md mb-3 text-white ${
+              isPerfect
+                ? 'bg-gradient-to-tr from-emerald-600 to-teal-400 shadow-emerald-500/20'
+                : 'bg-gradient-to-tr from-[#2563EB] to-[#60A5FA] shadow-blue-500/20'
+            }`}
+          >
             <Award className="w-8 h-8" />
           </div>
 
@@ -209,11 +207,11 @@ export default function QuizResultsPage() {
             Official Hrilosopah Achievement
           </span>
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1.5">
-            AI & Crypto Knowledge Verification
+            {quizDetails?.quizTitle || 'Quiz Knowledge Verification'}
           </h1>
           <p className="text-xs text-slate-500 max-w-md mb-3.5 leading-relaxed">
             Issued to <span className="text-slate-900 font-bold">Verified Learner</span> for
-            completing all 15 questions with 100% accuracy.
+            completing {actualScore} of {totalQs} questions correctly ({accuracyPct}% accuracy).
           </p>
 
           <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 bg-blue-50/80 border border-blue-100 px-4 py-2 rounded-xl">
@@ -227,25 +225,30 @@ export default function QuizResultsPage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="bg-white border border-blue-100 rounded-xl p-3 text-center shadow-sm">
             <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Score</span>
-            <span className="text-xl font-black text-[#2563EB]">100%</span>
+            <span className="text-xl font-black text-[#2563EB]">{accuracyPct}%</span>
           </div>
           <div className="bg-white border border-blue-100 rounded-xl p-3 text-center shadow-sm">
             <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
               Accuracy
             </span>
-            <span className="text-xl font-black text-[#2563EB]">15 / 15 Correct</span>
+            <span className="text-xl font-black text-[#2563EB]">
+              {actualScore} / {totalQs} Correct
+            </span>
           </div>
           <div className="bg-white border border-blue-100 rounded-xl p-3 text-center shadow-sm">
-            <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+            <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1 flex items-center justify-center gap-1">
+              <Clock className="w-3 h-3 text-slate-400" />
               Time Spent
             </span>
-            <span className="text-xl font-black text-[#2563EB]">4m 12s</span>
+            <span className="text-xl font-black text-[#2563EB]">{timeSpentText}</span>
           </div>
           <div className="bg-white border border-blue-100 rounded-xl p-3 text-center shadow-sm">
             <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
               Points
             </span>
-            <span className="text-xl font-black text-[#2563EB]">1,500 pts</span>
+            <span className="text-xl font-black text-[#2563EB]">
+              {totalPoints.toLocaleString()} pts
+            </span>
           </div>
         </div>
 
@@ -258,63 +261,136 @@ export default function QuizResultsPage() {
                 Full Question Answers & Explanations
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Review all 15 questions, correct answers, and explanations
+                Detailed view of all questions, options, your choices, and explanation notes
               </p>
             </div>
             <span className="px-2.5 py-1 bg-blue-50 text-[#2563EB] text-[10px] font-bold rounded-full border border-blue-100">
-              15 Questions
+              {evaluatedQuestions.length} Questions
             </span>
           </div>
 
-          <div className="space-y-3">
-            {sampleQuestions.map((q, idx) => {
-              const isExpanded = expandedQuestion === idx;
+          <div className="space-y-4">
+            {evaluatedQuestions.map((q, idx) => {
+              const isCollapsed = expandedQuestion !== null && expandedQuestion !== idx;
+
               return (
                 <div
-                  key={q.id}
-                  className="border border-blue-100 rounded-2xl overflow-hidden bg-[#FAFCFF] transition-colors"
+                  key={q.id || idx}
+                  className={`border rounded-2xl overflow-hidden transition-all ${
+                    q.isCorrect
+                      ? 'border-emerald-200 bg-emerald-50/10'
+                      : 'border-rose-200 bg-rose-50/10'
+                  }`}
                 >
                   <button
-                    onClick={() => setExpandedQuestion(isExpanded ? null : idx)}
-                    className="w-full p-4 text-left flex items-start justify-between gap-3 hover:bg-blue-50/50 transition-colors"
+                    onClick={() => setExpandedQuestion(isCollapsed ? idx : null)}
+                    className="w-full p-4 text-left flex items-start justify-between gap-3 hover:bg-slate-50/80 transition-colors"
                   >
                     <div className="flex items-start gap-3">
-                      <div className="w-7 h-7 rounded-full bg-blue-100 text-[#2563EB] flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs">
-                        <CheckCircle2 className="w-4 h-4 text-[#2563EB]" />
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 mt-0.5 font-bold text-xs ${
+                          q.isCorrect
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-rose-100 text-rose-700'
+                        }`}
+                      >
+                        {q.isCorrect ? (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        ) : (
+                          <XCircle className="w-4 h-4 text-rose-600" />
+                        )}
                       </div>
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
-                          Question {idx + 1} • {q.topic}
-                        </span>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Question {idx + 1}
+                          </span>
+                          <span
+                            className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                              q.isCorrect
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            {q.isCorrect ? '✓ Correct' : '✗ Incorrect'}
+                          </span>
+                        </div>
                         <h4 className="text-xs sm:text-sm font-bold text-slate-900 leading-snug">
-                          {q.question}
+                          {q.text}
                         </h4>
                       </div>
                     </div>
-                    {isExpanded ? (
-                      <ChevronUp className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
-                    ) : (
+                    {isCollapsed ? (
                       <ChevronDown className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
+                    ) : (
+                      <ChevronUp className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
                     )}
                   </button>
 
-                  {isExpanded && (
-                    <div className="px-4 pb-4 pt-1 border-t border-blue-50 bg-white space-y-3 text-xs">
+                  {!isCollapsed && (
+                    <div className="px-4 pb-4 pt-2 border-t border-slate-100 bg-white space-y-3.5 text-xs">
+                      {/* Options List */}
                       <div>
-                        <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
-                          Your Answer & Correct Option:
+                        <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1.5">
+                          Answer Options:
                         </span>
-                        <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-[#1E40AF] font-semibold">
-                          ✓ {q.correctAnswer}
+                        <div className="space-y-1.5">
+                          {q.options.map((optText, optIdx) => {
+                            const isUserSelection = q.userChosenIdx === optIdx;
+                            const isCorrectOpt = q.correctOptionIndex === optIdx;
+
+                            let optStyle = 'bg-slate-50 border-slate-200 text-slate-700';
+                            if (isCorrectOpt) {
+                              optStyle =
+                                'bg-emerald-50 border-emerald-300 text-emerald-900 font-bold';
+                            } else if (isUserSelection && !q.isCorrect) {
+                              optStyle =
+                                'bg-rose-50 border-rose-300 text-rose-900 font-bold line-through';
+                            }
+
+                            return (
+                              <div
+                                key={optIdx}
+                                className={`p-2.5 rounded-xl border text-xs flex items-center justify-between transition-colors ${optStyle}`}
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="font-extrabold text-[10px] opacity-60">
+                                    {String.fromCharCode(65 + optIdx)}.
+                                  </span>
+                                  <span>{optText}</span>
+                                </span>
+                                <div className="flex items-center gap-1.5 shrink-0">
+                                  {isUserSelection && (
+                                    <span
+                                      className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
+                                        q.isCorrect
+                                          ? 'bg-emerald-200 text-emerald-900'
+                                          : 'bg-rose-200 text-rose-900'
+                                      }`}
+                                    >
+                                      Your Selection
+                                    </span>
+                                  )}
+                                  {isCorrectOpt && (
+                                    <span className="text-[9px] font-extrabold bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full">
+                                      ✓ Correct Answer
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
 
+                      {/* Explanation Note */}
                       <div>
                         <span className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
-                          Explanation:
+                          Explanation Note:
                         </span>
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed">
-                          {q.explanation}
+                        <div className="p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-slate-700 leading-relaxed text-xs">
+                          {q.explanation ||
+                            'This question evaluates core concepts and fundamentals.'}
                         </div>
                       </div>
                     </div>

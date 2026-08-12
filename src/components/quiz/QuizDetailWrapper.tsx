@@ -144,7 +144,9 @@ export const QuizDetailWrapper = ({
               <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
                 <BarChart2 className="w-4 h-4 text-green-600" />
               </div>
-              <span className="font-bold text-gray-900 text-xs">Beginner</span>
+              <span className="font-bold text-gray-900 text-xs capitalize">
+                {quizData.difficulty || 'Beginner'}
+              </span>
               <span className="text-[9px] text-gray-500">Difficulty</span>
             </div>
 

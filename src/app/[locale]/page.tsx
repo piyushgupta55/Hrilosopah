@@ -121,6 +121,13 @@ export default async function HomePage({ params: { locale } }: { params: { local
   // Dynamically replace hardcoded greeting name in internationalized messages
   const greetingText = t('greeting').replace('Piyush', userName);
 
+  const publishedQuizzes = await prisma.quiz.findMany({
+    where: { isActive: true },
+    include: { translations: true, questions: true },
+    take: 6,
+    orderBy: { createdAt: 'desc' },
+  });
+
   return (
     <div
       className="flex-1 w-full bg-[#F8F9FA] pt-4 flex flex-col overflow-y-auto overflow-x-hidden relative"
@@ -207,15 +214,15 @@ export default async function HomePage({ params: { locale } }: { params: { local
               </div>
             </div>
           </Link>
-        ) : (
-          <Link href={`/${locale}/quiz/ai-awareness`} className="block">
+        ) : publishedQuizzes.length > 0 ? (
+          <Link href={`/${locale}/quiz/${publishedQuizzes[0].slug}`} className="block">
             <div className="bg-white rounded-xl p-4 shadow-sm border border-blue-100 flex items-center gap-4 hover:shadow-md transition-shadow">
               <div className="w-14 h-14 rounded-[14px] bg-[#EEF2FF] flex items-center justify-center shrink-0">
                 <Brain className="w-7 h-7 text-indigo-600" strokeWidth={1.5} />
               </div>
               <div className="flex-1 min-w-0">
                 <h4 className="font-bold text-gray-900 text-base truncate mb-0.5">
-                  {tCards('aiAwareness')}
+                  {publishedQuizzes[0].translations?.[0]?.title || publishedQuizzes[0].slug}
                 </h4>
                 <p className="text-gray-500 text-xs">
                   Start your first quiz to begin tracking your progress!
@@ -227,7 +234,7 @@ export default async function HomePage({ params: { locale } }: { params: { local
               </div>
             </div>
           </Link>
-        )}
+        ) : null}
       </div>
 
       {/* Recommended For You */}
@@ -235,52 +242,42 @@ export default async function HomePage({ params: { locale } }: { params: { local
         <h3 className="font-bold text-gray-900 text-lg mb-4">{t('recommended')}</h3>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <Link href={`/${locale}/quiz/ai-awareness`}>
-            <div className="bg-white dark:bg-[#121722] rounded-[22px] p-5 shadow-sm border border-gray-100 dark:border-white/[0.06] flex flex-col items-center text-center h-full hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-purple-500/10 to-transparent opacity-100"></div>
+          {publishedQuizzes.map((quiz, idx) => {
+            const displayTitle =
+              quiz.translations?.[0]?.title ||
+              quiz.slug
+                .split('-')
+                .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                .join(' ');
 
-              <div className="w-full flex justify-start mb-2 relative z-10">
-                <span className="px-2.5 py-1 bg-[#F3E8FF] dark:bg-[#8B5CF6]/20 text-[#7E22CE] dark:text-[#8B5CF6] text-[10px] font-bold rounded-full uppercase tracking-wider">
-                  {tExplore('popular')}
-                </span>
-              </div>
+            return (
+              <Link key={quiz.id} href={`/${locale}/quiz/${quiz.slug}`}>
+                <div className="bg-white dark:bg-[#121722] rounded-[22px] p-5 shadow-sm border border-gray-100 dark:border-white/[0.06] flex flex-col items-center text-center h-full hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-purple-500/10 to-transparent opacity-100"></div>
 
-              <div className="w-16 h-16 rounded-full bg-[#F3E8FF] dark:bg-[#8B5CF6]/15 flex items-center justify-center mb-4 mt-2 relative z-10">
-                <Brain className="w-8 h-8 text-purple-600 dark:text-[#8B5CF6]" strokeWidth={1.5} />
-              </div>
+                  <div className="w-full flex justify-start mb-2 relative z-10">
+                    <span className="px-2.5 py-1 bg-[#F3E8FF] dark:bg-[#8B5CF6]/20 text-[#7E22CE] dark:text-[#8B5CF6] text-[10px] font-bold rounded-full uppercase tracking-wider">
+                      {idx === 0 ? tExplore('popular') : tExplore('newLabel')}
+                    </span>
+                  </div>
 
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1 relative z-10">
-                {tCards('aiAwareness')}
-              </h4>
-              <p className="text-gray-400 dark:text-[#8B93A7] text-[11px] relative z-10">
-                {t('quizDesc')}
-              </p>
-            </div>
-          </Link>
+                  <div className="w-16 h-16 rounded-full bg-[#F3E8FF] dark:bg-[#8B5CF6]/15 flex items-center justify-center mb-4 mt-2 relative z-10">
+                    <Brain
+                      className="w-8 h-8 text-purple-600 dark:text-[#8B5CF6]"
+                      strokeWidth={1.5}
+                    />
+                  </div>
 
-          <Link href={`/${locale}/quiz/crypto-blockchain`}>
-            <div className="bg-white dark:bg-[#121722] rounded-[22px] p-5 shadow-sm border border-gray-100 dark:border-white/[0.06] flex flex-col items-center text-center h-full hover:shadow-md transition-all hover:-translate-y-0.5 duration-200 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-blue-500/10 to-transparent opacity-100"></div>
-
-              <div className="w-full flex justify-between items-start mb-2 relative z-10">
-                <span className="px-2.5 py-1 bg-[#ECFDF5] dark:bg-[#22C55E]/20 text-[#059669] dark:text-[#22C55E] text-[10px] font-bold rounded-full uppercase tracking-wider">
-                  {tExplore('newLabel')}
-                </span>
-                <Bitcoin className="w-5 h-5 text-blue-600 dark:text-[#4F7DFF]" strokeWidth={1.8} />
-              </div>
-
-              <div className="w-16 h-16 rounded-full bg-[#E0F2FE] dark:bg-[#4F7DFF]/15 flex items-center justify-center mb-4 mt-2 relative z-10">
-                <Bitcoin className="w-8 h-8 text-blue-600 dark:text-[#4F7DFF]" strokeWidth={1.5} />
-              </div>
-
-              <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1 relative z-10">
-                {tCards('cryptoBasics')}
-              </h4>
-              <p className="text-gray-400 dark:text-[#8B93A7] text-[11px] relative z-10">
-                {t('quizDesc')}
-              </p>
-            </div>
-          </Link>
+                  <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-1 relative z-10 line-clamp-2">
+                    {displayTitle}
+                  </h4>
+                  <p className="text-gray-400 dark:text-[#8B93A7] text-[11px] relative z-10">
+                    {quiz.questions?.length || 10} Questions
+                  </p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </div>
 

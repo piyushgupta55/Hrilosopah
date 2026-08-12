@@ -116,7 +116,11 @@ export default async function SummaryPage({
               </div>
             </div>
             <Link
-              href={`/${locale}/quiz/${quizSlug}/results`}
+              href={
+                attemptId
+                  ? `/${locale}/quiz/${quizSlug}/results?attemptId=${attemptId}`
+                  : `/${locale}/quiz/${quizSlug}/results`
+              }
               className="w-full py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg font-bold text-xs shadow-md text-center transition-all active:scale-[0.98]"
             >
               View Full Detailed Results & Answers

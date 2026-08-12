@@ -65,8 +65,10 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
   // Quiz Form State
   const [formTitle, setFormTitle] = useState('');
   const [formSlug, setFormSlug] = useState('');
-  const [formCategory, setFormCategory] = useState('AI');
+  const [formCategory, setFormCategory] = useState('Coding');
   const [customCategory, setCustomCategory] = useState('');
+  const [formDifficulty, setFormDifficulty] = useState('beginner');
+  const [formQuizType, setFormQuizType] = useState('Build-Up/Leveled');
   const [formIsActive, setFormIsActive] = useState(true);
 
   // Question Form State
@@ -89,11 +91,12 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
   // Extract all unique categories dynamically
   const uniqueCategories = Array.from(
     new Set([
+      'Coding',
+      'Python',
       'AI',
       'Crypto',
       'Machine Learning',
       'Web3',
-      'Python',
       ...quizzes.map((q) => q.category).filter(Boolean),
     ])
   );
@@ -101,8 +104,10 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
   const openCreateModal = () => {
     setFormTitle('');
     setFormSlug('');
-    setFormCategory('AI');
+    setFormCategory('Coding');
     setCustomCategory('');
+    setFormDifficulty('beginner');
+    setFormQuizType('Build-Up/Leveled');
     setFormIsActive(true);
     setErrorMsg('');
     setIsCreateOpen(true);
@@ -114,6 +119,8 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
     setFormSlug(quiz.slug);
     setFormCategory(quiz.category);
     setCustomCategory(uniqueCategories.includes(quiz.category) ? '' : quiz.category);
+    setFormDifficulty((quiz as any).difficulty || 'beginner');
+    setFormQuizType((quiz as any).quizType || 'Build-Up/Leveled');
     setFormIsActive(quiz.isActive);
     setErrorMsg('');
   };
@@ -144,10 +151,17 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formTitle || !formSlug) {
-      setErrorMsg('Please fill in title and slug.');
+    if (!formTitle) {
+      setErrorMsg('Please fill in the quiz title.');
       return;
     }
+
+    const autoSlug =
+      formSlug ||
+      formTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '');
 
     const finalCategory = formCategory === 'custom' ? customCategory || 'General' : formCategory;
 
@@ -160,8 +174,10 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: formTitle,
-          slug: formSlug,
+          slug: autoSlug,
           category: finalCategory,
+          difficulty: formDifficulty,
+          quizType: formQuizType,
           isActive: formIsActive,
         }),
       });
@@ -173,7 +189,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
 
       const newQuiz: QuizItem = {
         id: data.quiz.id || String(Date.now()),
-        slug: data.quiz.slug || formSlug,
+        slug: data.quiz.slug || autoSlug,
         category: finalCategory,
         isActive: formIsActive,
         title: formTitle,
@@ -211,6 +227,8 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
           id: editingQuiz.id,
           title: formTitle,
           category: finalCategory,
+          difficulty: formDifficulty,
+          quizType: formQuizType,
           isActive: formIsActive,
         }),
       });
@@ -453,7 +471,6 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
   const adminNav = [
     { label: 'Overview', href: `/${locale}/admin/dashboard`, active: false },
     { label: 'Quizzes & Categories', href: `/${locale}/admin/quizzes`, active: true },
-    { label: 'All Question Bank', href: `/${locale}/admin/questions`, active: false },
     { label: 'Users', href: `/${locale}/admin/users`, active: false },
     { label: 'Payments ($1)', href: `/${locale}/admin/payments`, active: false },
   ];
@@ -979,7 +996,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
                 <FolderPlus className="w-5 h-5 text-[#2563EB]" />
-                Create New Category & Quiz
+                Create New Quiz & Category
               </h3>
               <button
                 onClick={() => setIsCreateOpen(false)}
@@ -1000,48 +1017,65 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                 <label className="text-xs font-extrabold text-slate-700">Quiz Title</label>
                 <input
                   type="text"
-                  placeholder="e.g. Cyber Security Fundamentals"
+                  placeholder="e.g. Python Basics, Cyber Security, React Mastery"
                   value={formTitle}
                   onChange={(e) => {
-                    setFormTitle(e.target.value);
+                    const titleVal = e.target.value;
+                    setFormTitle(titleVal);
                     setFormSlug(
-                      e.target.value
+                      titleVal
                         .toLowerCase()
                         .replace(/[^a-z0-9]+/g, '-')
                         .replace(/(^-|-$)/g, '')
                     );
+                    if (titleVal.trim()) {
+                      const trimmed = titleVal.trim();
+                      if (
+                        ['Coding', 'Python', 'AI', 'Crypto', 'Machine Learning', 'Web3'].includes(
+                          trimmed
+                        )
+                      ) {
+                        setFormCategory(trimmed);
+                        setCustomCategory('');
+                      } else {
+                        setFormCategory('custom');
+                        setCustomCategory(trimmed);
+                      }
+                    }
                   }}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   required
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700">Quiz URL Slug</label>
-                <input
-                  type="text"
-                  placeholder="cyber-security-fundamentals"
-                  value={formSlug}
-                  onChange={(e) => setFormSlug(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700">Category Name</label>
+                  <label className="text-xs font-extrabold text-slate-700">Category</label>
                   <select
                     value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   >
+                    <option value="Coding">Coding</option>
+                    <option value="Python">Python</option>
                     <option value="AI">AI</option>
                     <option value="Crypto">Crypto</option>
                     <option value="Machine Learning">Machine Learning</option>
                     <option value="Web3">Web3</option>
-                    <option value="Python">Python</option>
-                    <option value="custom">+ Create New Category...</option>
+                    <option value="custom">+ New Category...</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Difficulty</label>
+                  <select
+                    value={formDifficulty}
+                    onChange={(e) => setFormDifficulty(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                  >
+                    <option value="beginner">Beginner / Easy</option>
+                    <option value="intermediate">Intermediate / Medium</option>
+                    <option value="advanced">Advanced / Hard</option>
                   </select>
                 </div>
 
@@ -1050,7 +1084,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                   <select
                     value={formIsActive ? 'active' : 'draft'}
                     onChange={(e) => setFormIsActive(e.target.value === 'active')}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="active">Active DB</option>
                     <option value="draft">Draft</option>
@@ -1060,9 +1094,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
 
               {formCategory === 'custom' && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700">
-                    Enter New Category Name
-                  </label>
+                  <label className="text-xs font-extrabold text-slate-700">Category Name</label>
                   <input
                     type="text"
                     placeholder="e.g. Robotics, Data Science, Cybersecurity"
@@ -1073,6 +1105,39 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                   />
                 </div>
               )}
+
+              {/* Quiz Type Selector & Explanatory Note */}
+              <div className="space-y-2 pt-1 border-t border-slate-100">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Quiz Type</label>
+                  <select
+                    value={formQuizType}
+                    onChange={(e) => setFormQuizType(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                  >
+                    <option value="Build-Up/Leveled">Build-Up / Leveled Quiz</option>
+                    <option value="This or That">This or That (Rapid Choice)</option>
+                    <option value="Timed Challenge">Timed Speed Challenge</option>
+                    <option value="Daily Challenge">Daily Streak Challenge</option>
+                  </select>
+                </div>
+
+                <div className="p-3 bg-blue-50/80 border border-blue-200 text-slate-700 text-xs rounded-xl leading-relaxed space-y-1">
+                  <span className="font-black text-blue-700 flex items-center gap-1">
+                    💡 Meaning of selected Quiz Type:
+                  </span>
+                  <p className="text-slate-600 font-medium">
+                    {formQuizType === 'This or That' &&
+                      'Binary choice quiz with 2 rapid options per question designed for quick decision-making and instant learning.'}
+                    {formQuizType === 'Timed Challenge' &&
+                      'Speed-focused challenge with a active countdown timer for each question to earn extra bonus XP.'}
+                    {formQuizType === 'Daily Challenge' &&
+                      'Special rotating daily challenge quiz designed to reward daily active players with extra streak bonus XP.'}
+                    {(formQuizType === 'Build-Up/Leveled' || !formQuizType) &&
+                      'Progressive level-based quiz (Level 1, Level 2, Level 3) where questions get progressively more challenging as users level up.'}
+                  </p>
+                </div>
+              </div>
 
               <div className="pt-2 flex justify-end gap-2">
                 <button
@@ -1088,7 +1153,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                   className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  <span>{loading ? 'Creating...' : 'Save Category & Quiz'}</span>
+                  <span>{loading ? 'Creating...' : 'Save Quiz'}</span>
                 </button>
               </div>
             </form>
@@ -1103,7 +1168,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-[#2563EB]" />
-                Edit Quiz ({editingQuiz.slug})
+                Edit Quiz ({editingQuiz.title})
               </h3>
               <button
                 onClick={() => setEditingQuiz(null)}
@@ -1125,19 +1190,28 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                 <input
                   type="text"
                   value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
+                  onChange={(e) => {
+                    const titleVal = e.target.value;
+                    setFormTitle(titleVal);
+                    setFormSlug(
+                      titleVal
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/(^-|-$)/g, '')
+                    );
+                  }}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700">Category</label>
                   <select
                     value={uniqueCategories.includes(formCategory) ? formCategory : 'custom'}
                     onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   >
                     {uniqueCategories.map((cat) => (
                       <option key={cat} value={cat}>
@@ -1149,11 +1223,24 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                 </div>
 
                 <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Difficulty</label>
+                  <select
+                    value={formDifficulty}
+                    onChange={(e) => setFormDifficulty(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                  >
+                    <option value="beginner">Beginner / Easy</option>
+                    <option value="intermediate">Intermediate / Medium</option>
+                    <option value="advanced">Advanced / Hard</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700">Status</label>
                   <select
                     value={formIsActive ? 'active' : 'draft'}
                     onChange={(e) => setFormIsActive(e.target.value === 'active')}
-                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   >
                     <option value="active">Active DB</option>
                     <option value="draft">Draft</option>
@@ -1163,9 +1250,7 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
 
               {formCategory === 'custom' && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-extrabold text-slate-700">
-                    Enter Custom Category
-                  </label>
+                  <label className="text-xs font-extrabold text-slate-700">Custom Category</label>
                   <input
                     type="text"
                     value={customCategory}
@@ -1175,6 +1260,39 @@ export function AdminQuizzesClient({ locale, initialQuizzes }: AdminQuizzesClien
                   />
                 </div>
               )}
+
+              {/* Quiz Type Selector & Explanatory Note */}
+              <div className="space-y-2 pt-1 border-t border-slate-100">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-extrabold text-slate-700">Quiz Type</label>
+                  <select
+                    value={formQuizType}
+                    onChange={(e) => setFormQuizType(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                  >
+                    <option value="Build-Up/Leveled">Build-Up / Leveled Quiz</option>
+                    <option value="This or That">This or That (Rapid Choice)</option>
+                    <option value="Timed Challenge">Timed Speed Challenge</option>
+                    <option value="Daily Challenge">Daily Streak Challenge</option>
+                  </select>
+                </div>
+
+                <div className="p-3 bg-blue-50/80 border border-blue-200 text-slate-700 text-xs rounded-xl leading-relaxed space-y-1">
+                  <span className="font-black text-blue-700 flex items-center gap-1">
+                    💡 Meaning of selected Quiz Type:
+                  </span>
+                  <p className="text-slate-600 font-medium">
+                    {formQuizType === 'This or That' &&
+                      'Binary choice quiz with 2 rapid options per question designed for quick decision-making and instant learning.'}
+                    {formQuizType === 'Timed Challenge' &&
+                      'Speed-focused challenge with a active countdown timer for each question to earn extra bonus XP.'}
+                    {formQuizType === 'Daily Challenge' &&
+                      'Special rotating daily challenge quiz designed to reward daily active players with extra streak bonus XP.'}
+                    {(formQuizType === 'Build-Up/Leveled' || !formQuizType) &&
+                      'Progressive level-based quiz (Level 1, Level 2, Level 3) where questions get progressively more challenging as users level up.'}
+                  </p>
+                </div>
+              </div>
 
               <div className="pt-2 flex justify-end gap-2">
                 <button

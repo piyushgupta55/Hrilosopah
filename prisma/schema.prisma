@@ -12,6 +12,8 @@ model Quiz {
   id           String            @id @default(cuid())
   slug         String            @unique
   category     String
+  difficulty   String            @default("beginner")
+  quizType     String            @default("Build-Up/Leveled")
   isActive     Boolean           @default(true)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -26,6 +28,8 @@ model Question {
   source             QuestionSource        @default(static)
   status             QuestionStatus        @default(approved)
   difficulty         String                @default("beginner")
+  questionType       String                @default("single-choice")
+  order              Int                   @default(0)
   text               String
   options            String
   correctOptionIndex Int
@@ -40,6 +44,7 @@ model Attempt {
   id             String    @id @default(cuid())
   quizId         String
   sessionId      String
+  userId         String?
   startedAt      DateTime  @default(now())
   completedAt    DateTime?
   score          Int?
@@ -47,6 +52,7 @@ model Attempt {
   paymentStatus  String    @default("unpaid")
   email          String?
   quiz           Quiz      @relation(fields: [quizId], references: [id])
+  user           User?     @relation(fields: [userId], references: [id])
   payment        Payment?  @relation("PaymentOnAttempt")
 
   @@index([sessionId])
@@ -102,18 +108,47 @@ model QuestionTranslation {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  password   String
-  interests  String
-  goal       String
-  experience String
-  dailyTime  String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  name       String?
-  phone      String?
-  username   String?
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  interests     String
+  goal          String
+  experience    String
+  dailyTime     String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  name          String?
+  phone         String?
+  username      String?
+  status        String    @default("Active")
+  currentStreak Int       @default(0)
+  longestStreak Int       @default(0)
+  xp            Int       @default(0)
+  language      String    @default("English")
+  attempts      Attempt[]
+}
+
+model Achievement {
+  id             String   @id @default(cuid())
+  name           String
+  description    String
+  icon           String   @default("🏆")
+  conditionType  String   @default("quiz_count")
+  thresholdValue Int      @default(1)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model XpConfig {
+  id                     String   @id @default("global")
+  baseXpPerCorrect       Int      @default(10)
+  speedBonusMultiplier   Float    @default(1.5)
+  accuracyBonus100       Int      @default(50)
+  streakMultiplierPerDay Float    @default(1.1)
+  streakCapDays          Int      @default(30)
+  dailyChallengeBonusXp  Int      @default(100)
+  updatedAt              DateTime @updatedAt
 }
 
 enum QuestionSource {

@@ -37,15 +37,15 @@ export default async function AdminDashboardPage({
   const stats = [
     { title: 'Total Quizzes', count: String(quizCount), change: 'Live from DB', icon: BookOpen },
     {
-      title: 'Approved Questions',
+      title: 'Total Questions',
       count: String(questionCount),
-      change: 'Active in bank',
+      change: 'Across all quizzes',
       icon: HelpCircle,
     },
     {
       title: 'Total Quiz Attempts',
       count: String(attemptCount),
-      change: 'Completed by users',
+      change: 'Logged user attempts',
       icon: Users,
     },
     {
@@ -59,7 +59,6 @@ export default async function AdminDashboardPage({
   const adminNav = [
     { label: 'Overview', href: `/${locale}/admin/dashboard`, active: true },
     { label: 'Quizzes', href: `/${locale}/admin/quizzes`, active: false },
-    { label: 'Questions', href: `/${locale}/admin/questions`, active: false },
     { label: 'Users', href: `/${locale}/admin/users`, active: false },
     { label: 'Payments ($1)', href: `/${locale}/admin/payments`, active: false },
   ];

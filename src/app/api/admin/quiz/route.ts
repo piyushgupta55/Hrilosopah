@@ -1,8 +1,75 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+
+    // If ID is provided, return full quiz detail with questions for editor pre-population
+    if (id) {
+      const quiz = await prisma.quiz.findUnique({
+        where: { id },
+        include: {
+          translations: true,
+          questions: {
+            orderBy: { order: 'asc' },
+          },
+        },
+      });
+
+      if (!quiz) {
+        return NextResponse.json({ error: 'Quiz not found' }, { status: 404 });
+      }
+
+      const enTrans = quiz.translations.find((t) => t.locale === 'en');
+      const title = enTrans?.title || quiz.slug.toUpperCase().replace(/-/g, ' ');
+
+      const formattedQuestions = quiz.questions.map((q) => {
+        let parsedOptions: string[] = [];
+        try {
+          parsedOptions = JSON.parse(q.options);
+          if (!Array.isArray(parsedOptions)) parsedOptions = [];
+        } catch {
+          parsedOptions = [];
+        }
+
+        let correctIndexes: number[] = [q.correctOptionIndex];
+        // If options or metadata encodes multiple correct answers, handle gracefully
+        if (q.correctOptionIndex < 0 && (q as any).correctIndexes) {
+          correctIndexes = (q as any).correctIndexes;
+        }
+
+        return {
+          id: q.id,
+          text: q.text,
+          questionType: q.questionType || 'single-choice',
+          options: parsedOptions.length > 0 ? parsedOptions : ['', ''],
+          correctOptionIndex: q.correctOptionIndex,
+          correctIndexes,
+          explanation: q.explanation || '',
+          difficulty: q.difficulty || 'beginner',
+          order: q.order || 0,
+        };
+      });
+
+      return NextResponse.json({
+        success: true,
+        quiz: {
+          id: quiz.id,
+          slug: quiz.slug,
+          title,
+          category: quiz.category,
+          difficulty: quiz.difficulty || 'beginner',
+          quizType: quiz.quizType || 'Build-Up/Leveled',
+          status: quiz.isActive ? 'Published' : 'Draft',
+          isActive: quiz.isActive,
+          questions: formattedQuestions,
+        },
+      });
+    }
+
+    // Default list view logic
     const rawQuizzes = await prisma.quiz.findMany({
       include: {
         _count: {
@@ -18,7 +85,7 @@ export async function GET() {
 
     const quizzes = rawQuizzes.map((q) => {
       const enTrans = q.translations.find((t) => t.locale === 'en');
-      const difficulty = q.questions[0]?.difficulty || 'beginner';
+      const difficulty = q.difficulty || q.questions[0]?.difficulty || 'beginner';
 
       return {
         id: q.id,
@@ -26,6 +93,7 @@ export async function GET() {
         title: enTrans?.title || q.slug.toUpperCase().replace(/-/g, ' '),
         category: q.category,
         difficulty,
+        quizType: q.quizType || 'Build-Up/Leveled',
         questionsCount: q._count?.questions || q.questions.length || 0,
         status: q.isActive ? 'Published' : 'Draft',
         isActive: q.isActive,
@@ -46,26 +114,29 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { title, slug, category, isActive } = body;
+    const { title, slug, category, difficulty, quizType, isActive, status, questions } = body;
 
-    if (!title || !slug || !category) {
-      return NextResponse.json(
-        { error: 'Title, slug, and category are required.' },
-        { status: 400 }
-      );
+    if (!title || !category) {
+      return NextResponse.json({ error: 'Title and category are required.' }, { status: 400 });
     }
 
-    const cleanSlug = slug
+    const rawSlug = slug || title;
+    const cleanSlug = rawSlug
       .trim()
       .toLowerCase()
-      .replace(/[^a-z0-9-]/g, '-');
+      .replace(/[^a-z0-9-]/g, '-')
+      .replace(/-+/g, '-');
+
+    const isQuizActive = status === 'Published' || Boolean(isActive);
 
     // Create quiz and title translation
     const quiz = await prisma.quiz.create({
       data: {
         slug: cleanSlug,
         category: category.trim(),
-        isActive: Boolean(isActive),
+        difficulty: difficulty || 'beginner',
+        quizType: quizType || 'Build-Up/Leveled',
+        isActive: isQuizActive,
         translations: {
           create: {
             locale: 'en',
@@ -73,10 +144,35 @@ export async function POST(req: Request) {
           },
         },
       },
-      include: {
-        translations: true,
-      },
     });
+
+    // Create questions if present
+    if (Array.isArray(questions) && questions.length > 0) {
+      const questionsData = questions.map((q: any, index: number) => {
+        const optionsArr = Array.isArray(q.options) ? q.options : [];
+        const correctIdx =
+          typeof q.correctOptionIndex === 'number'
+            ? q.correctOptionIndex
+            : Array.isArray(q.correctIndexes) && q.correctIndexes.length > 0
+              ? q.correctIndexes[0]
+              : 0;
+
+        return {
+          quizId: quiz.id,
+          text: (q.text || '').trim(),
+          options: JSON.stringify(optionsArr),
+          correctOptionIndex: correctIdx,
+          explanation: q.explanation ? q.explanation.trim() : null,
+          difficulty: q.difficulty || difficulty || 'beginner',
+          questionType: q.questionType || 'single-choice',
+          order: index,
+        };
+      });
+
+      await prisma.question.createMany({
+        data: questionsData,
+      });
+    }
 
     return NextResponse.json({ success: true, quiz }, { status: 201 });
   } catch (error: any) {
@@ -91,18 +187,30 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     const body = await req.json();
-    const { id, title, category, isActive } = body;
+    const { id, title, slug, category, difficulty, quizType, isActive, status, questions } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Quiz ID is required for edit.' }, { status: 400 });
     }
 
+    const isQuizActive = status !== undefined ? status === 'Published' : Boolean(isActive);
+
+    const updateData: any = {
+      isActive: isQuizActive,
+    };
+    if (category) updateData.category = category.trim();
+    if (difficulty) updateData.difficulty = difficulty;
+    if (quizType) updateData.quizType = quizType;
+    if (slug) {
+      updateData.slug = slug
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9-]/g, '-');
+    }
+
     const updatedQuiz = await prisma.quiz.update({
       where: { id },
-      data: {
-        category: category?.trim(),
-        isActive: Boolean(isActive),
-      },
+      data: updateData,
     });
 
     if (title) {
@@ -123,6 +231,41 @@ export async function PUT(req: Request) {
             locale: 'en',
             title: title.trim(),
           },
+        });
+      }
+    }
+
+    // Sync questions if questions array provided
+    if (Array.isArray(questions)) {
+      // Delete existing questions for this quiz and recreate with updated payload
+      await prisma.question.deleteMany({
+        where: { quizId: id },
+      });
+
+      if (questions.length > 0) {
+        const questionsData = questions.map((q: any, index: number) => {
+          const optionsArr = Array.isArray(q.options) ? q.options : [];
+          const correctIdx =
+            typeof q.correctOptionIndex === 'number'
+              ? q.correctOptionIndex
+              : Array.isArray(q.correctIndexes) && q.correctIndexes.length > 0
+                ? q.correctIndexes[0]
+                : 0;
+
+          return {
+            quizId: id,
+            text: (q.text || '').trim(),
+            options: JSON.stringify(optionsArr),
+            correctOptionIndex: correctIdx,
+            explanation: q.explanation ? q.explanation.trim() : null,
+            difficulty: q.difficulty || difficulty || 'beginner',
+            questionType: q.questionType || 'single-choice',
+            order: index,
+          };
+        });
+
+        await prisma.question.createMany({
+          data: questionsData,
         });
       }
     }

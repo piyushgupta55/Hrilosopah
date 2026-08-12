@@ -2,7 +2,25 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Shield, Plus, Search, Edit3, Trash2, X, Check, Loader2, Sparkles } from 'lucide-react';
+import {
+  Shield,
+  Plus,
+  Search,
+  Edit3,
+  Trash2,
+  X,
+  Loader2,
+  Sparkles,
+  ArrowLeft,
+  Code,
+  Terminal,
+  Brain,
+  Cpu,
+  Globe,
+  Layers,
+  ChevronRight,
+  BookOpen,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export interface QuestionItem {
@@ -21,11 +39,71 @@ interface AdminQuestionsClientProps {
   initialQuestions: QuestionItem[];
 }
 
+interface CategoryInfo {
+  name: string;
+  icon: any;
+  desc: string;
+  color: string;
+  badgeBg: string;
+  badgeText: string;
+}
+
+const CATEGORY_METADATA: Record<string, CategoryInfo> = {
+  Coding: {
+    name: 'Coding',
+    icon: Code,
+    desc: 'Programming logic, algorithms, array manipulation & output tracing',
+    color: 'from-blue-600 to-indigo-600',
+    badgeBg: 'bg-blue-50 border-blue-200 text-[#2563EB]',
+    badgeText: 'Coding',
+  },
+  Python: {
+    name: 'Python',
+    icon: Terminal,
+    desc: 'Python syntax, decorators, recursion, list comprehensions & OOP',
+    color: 'from-emerald-600 to-teal-600',
+    badgeBg: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+    badgeText: 'Python',
+  },
+  AI: {
+    name: 'AI',
+    icon: Cpu,
+    desc: 'Transformers, Neural Networks, RLHF & LLM fine-tuning',
+    color: 'from-purple-600 to-violet-600',
+    badgeBg: 'bg-purple-50 border-purple-200 text-purple-700',
+    badgeText: 'AI',
+  },
+  Crypto: {
+    name: 'Crypto',
+    icon: Shield,
+    desc: 'Proof-of-Stake, Bitcoin UTXO, Smart Contracts & Zero-Knowledge',
+    color: 'from-amber-500 to-orange-600',
+    badgeBg: 'bg-amber-50 border-amber-200 text-amber-700',
+    badgeText: 'Crypto',
+  },
+  'Machine Learning': {
+    name: 'Machine Learning',
+    icon: Brain,
+    desc: 'Supervised learning, gradient descent, feature engineering & models',
+    color: 'from-rose-500 to-pink-600',
+    badgeBg: 'bg-pink-50 border-pink-200 text-pink-700',
+    badgeText: 'ML',
+  },
+  Web3: {
+    name: 'Web3',
+    icon: Globe,
+    desc: 'DeFi protocol AMMs, dApps, Layer 2 rollups & Ethereum VM',
+    color: 'from-cyan-600 to-blue-600',
+    badgeBg: 'bg-cyan-50 border-cyan-200 text-cyan-700',
+    badgeText: 'Web3',
+  },
+};
+
 export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestionsClientProps) {
   const router = useRouter();
   const [questions, setQuestions] = useState<QuestionItem[]>(initialQuestions);
   const [searchTerm, setSearchTerm] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   // Modal State
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -40,7 +118,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
   const [formOption3, setFormOption3] = useState('');
   const [formCorrectIndex, setFormCorrectIndex] = useState(0);
   const [formDifficulty, setFormDifficulty] = useState('beginner');
-  const [formCategory, setFormCategory] = useState<string>('AI');
+  const [formCategory, setFormCategory] = useState<string>('Coding');
   const [customCategory, setCustomCategory] = useState('');
   const [formExplanation, setFormExplanation] = useState('');
 
@@ -50,17 +128,20 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Dynamically extract all unique categories present in the database question bank
+  // Extract all unique categories dynamically
   const uniqueCategories = Array.from(
     new Set([
+      'Coding',
+      'Python',
       'AI',
       'Crypto',
       'Machine Learning',
+      'Web3',
       ...questions.map((q) => q.category).filter(Boolean),
     ])
   );
 
-  const openAddModal = () => {
+  const openAddModal = (catToUse?: string) => {
     setFormText('');
     setFormOption0('');
     setFormOption1('');
@@ -68,8 +149,14 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
     setFormOption3('');
     setFormCorrectIndex(0);
     setFormDifficulty('beginner');
-    setFormCategory('AI');
-    setCustomCategory('');
+    const targetCategory = catToUse || selectedCategory || 'Coding';
+    if (['Coding', 'Python', 'AI', 'Crypto', 'Machine Learning', 'Web3'].includes(targetCategory)) {
+      setFormCategory(targetCategory);
+      setCustomCategory('');
+    } else {
+      setFormCategory('custom');
+      setCustomCategory(targetCategory);
+    }
     setFormExplanation('');
     setAiTopic('');
     setActiveAddTab('ai');
@@ -86,9 +173,11 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
     setFormOption3(q.options[3] || '');
     setFormCorrectIndex(q.correctOptionIndex);
     setFormDifficulty(q.difficulty);
-    setFormCategory(q.category || 'AI');
+    setFormCategory(q.category || 'Coding');
     setCustomCategory(
-      ['AI', 'Crypto', 'Machine Learning', 'Web3', 'Python'].includes(q.category) ? '' : q.category
+      ['Coding', 'Python', 'AI', 'Crypto', 'Machine Learning', 'Web3'].includes(q.category)
+        ? ''
+        : q.category
     );
     setFormExplanation(q.explanation || '');
     setErrorMsg('');
@@ -268,21 +357,23 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
     }
   };
 
+  // Filtered questions based on search & selected category
   const filteredQuestions = questions.filter((q) => {
     const matchesSearch =
       q.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
       q.options.some((opt) => opt.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesCat =
-      categoryFilter === 'all' || q.category.toLowerCase() === categoryFilter.toLowerCase();
+    const matchesCategory = selectedCategory
+      ? q.category.toLowerCase() === selectedCategory.toLowerCase()
+      : true;
 
-    return matchesSearch && matchesCat;
+    return matchesSearch && matchesCategory;
   });
 
   const adminNav = [
     { label: 'Overview', href: `/${locale}/admin/dashboard`, active: false },
     { label: 'Quizzes', href: `/${locale}/admin/quizzes`, active: false },
-    { label: 'Questions', href: `/${locale}/admin/questions`, active: true },
+    { label: 'Questions Bank', href: `/${locale}/admin/questions`, active: true },
     { label: 'Users', href: `/${locale}/admin/users`, active: false },
     { label: 'Payments ($1)', href: `/${locale}/admin/payments`, active: false },
   ];
@@ -298,7 +389,9 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
           <div>
             <h1 className="font-black text-base sm:text-lg text-slate-900">Manage Questions</h1>
             <span className="text-[11px] text-slate-500 font-semibold">
-              Total Bank: {questions.length} Questions
+              {selectedCategory
+                ? `Viewing Category: ${selectedCategory} (${filteredQuestions.length} Questions)`
+                : `Total Question Bank: ${questions.length} Questions across ${uniqueCategories.length} Categories`}
             </span>
           </div>
         </div>
@@ -328,152 +421,251 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
           ))}
         </div>
 
-        {/* Action Bar */}
-        <div className="bg-white border border-blue-100 rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1 overflow-x-auto">
-            {/* Search */}
-            <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search questions or keywords..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
-              />
+        {/* VIEW LEVEL 1: CATEGORY CARDS OVERVIEW (When no category is selected) */}
+        {!selectedCategory ? (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-blue-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold">
+                  <Layers className="w-4 h-4 text-blue-200" />
+                  <span>Category Overview</span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black">
+                  Select a Category to Manage Questions
+                </h2>
+                <p className="text-xs sm:text-sm text-blue-100">
+                  Click on any category card below to view, edit, update, or generate new questions
+                  specifically for that domain.
+                </p>
+              </div>
+
+              <button
+                onClick={() => openAddModal('Coding')}
+                className="px-5 py-3 bg-white hover:bg-blue-50 text-[#2563EB] font-black text-xs sm:text-sm rounded-2xl shadow-lg transition-all flex items-center gap-2 shrink-0 active:scale-95"
+              >
+                <Plus className="w-4.5 h-4.5" />
+                <span>+ Add Question to Any Category</span>
+              </button>
             </div>
 
-            {/* DYNAMIC Category Filter Pills */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl shrink-0 overflow-x-auto no-scrollbar">
-              <button
-                onClick={() => setCategoryFilter('all')}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                  categoryFilter === 'all' ? 'bg-white text-[#2563EB] shadow-sm' : 'text-slate-600'
-                }`}
-              >
-                All ({questions.length})
-              </button>
-              {uniqueCategories.map((cat) => {
+            {/* CATEGORY GRID */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {uniqueCategories.map((catName) => {
                 const count = questions.filter(
-                  (q) => q.category.toLowerCase() === cat.toLowerCase()
+                  (q) => q.category.toLowerCase() === catName.toLowerCase()
                 ).length;
+                const meta = CATEGORY_METADATA[catName] || {
+                  name: catName,
+                  icon: BookOpen,
+                  desc: `Questions and quizzes for ${catName} topics`,
+                  color: 'from-blue-600 to-indigo-600',
+                  badgeBg: 'bg-blue-50 border-blue-200 text-[#2563EB]',
+                  badgeText: catName,
+                };
+                const IconComp = meta.icon;
+
                 return (
-                  <button
-                    key={cat}
-                    onClick={() => setCategoryFilter(cat)}
-                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
-                      categoryFilter.toLowerCase() === cat.toLowerCase()
-                        ? 'bg-white text-[#2563EB] shadow-sm'
-                        : 'text-slate-600'
-                    }`}
+                  <div
+                    key={catName}
+                    onClick={() => setSelectedCategory(catName)}
+                    className="group bg-white rounded-3xl p-6 border border-blue-100/80 hover:border-blue-300 shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-5 transform hover:-translate-y-1 relative overflow-hidden"
                   >
-                    {cat} {count > 0 ? `(${count})` : ''}
-                  </button>
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div
+                          className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${meta.color} flex items-center justify-center text-white shadow-md shadow-blue-500/20 group-hover:scale-110 transition-transform`}
+                        >
+                          <IconComp className="w-6 h-6" />
+                        </div>
+
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-black border ${meta.badgeBg}`}
+                        >
+                          {count} Questions
+                        </span>
+                      </div>
+
+                      <div className="space-y-1">
+                        <h3 className="font-black text-lg text-slate-900 group-hover:text-[#2563EB] transition-colors">
+                          {catName}
+                        </h3>
+                        <p className="text-xs text-slate-500 leading-relaxed font-medium">
+                          {meta.desc}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold">
+                      <span className="text-[#2563EB] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        <span>Manage Questions</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAddModal(catName);
+                        }}
+                        className="px-3 py-1.5 bg-blue-50 hover:bg-[#2563EB] hover:text-white text-[#2563EB] rounded-xl border border-blue-100 font-extrabold text-xs transition-colors flex items-center gap-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>+ Add</span>
+                      </button>
+                    </div>
+                  </div>
                 );
               })}
             </div>
           </div>
+        ) : (
+          /* VIEW LEVEL 2: SELECTED CATEGORY QUESTIONS DETAIL VIEW */
+          <div className="space-y-6">
+            {/* Header & Back Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-blue-100 rounded-3xl p-5 sm:p-6 shadow-sm">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className="px-3.5 py-2 bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-[#2563EB] text-xs font-extrabold rounded-xl border border-slate-200 transition-colors flex items-center gap-1.5"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>All Categories</span>
+                </button>
 
-          <button
-            onClick={openAddModal}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md shadow-blue-500/20 active:scale-[0.98] shrink-0"
-          >
-            <Plus className="w-4.5 h-4.5" />
-            <span>+ Add New Question</span>
-          </button>
-        </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-black text-slate-900">{selectedCategory}</h2>
+                    <span className="px-3 py-0.5 rounded-full text-xs font-extrabold bg-blue-50 text-[#2563EB] border border-blue-200">
+                      {filteredQuestions.length} Questions
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Questions listed below belong to the category{' '}
+                    <strong className="text-slate-800">{selectedCategory}</strong>.
+                  </p>
+                </div>
+              </div>
 
-        {/* Clean Questions Table */}
-        <div className="bg-white border border-blue-100 rounded-2xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
-                <tr>
-                  <th className="p-4 w-12 text-center">#</th>
-                  <th className="p-4">Question Text & Correct Answer</th>
-                  <th className="p-4 w-36">Category</th>
-                  <th className="p-4 w-28">Difficulty</th>
-                  <th className="p-4 w-36 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredQuestions.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="p-10 text-center text-slate-500 font-semibold">
-                      No questions found for category filter. Click &quot;+ Add New Question&quot;
-                      above to create one.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredQuestions.map((q, idx) => {
-                    const correctAnswerText = q.options[q.correctOptionIndex] || q.options[0];
-                    return (
-                      <tr key={q.id} className="hover:bg-blue-50/40 transition-colors">
-                        <td className="p-4 text-center font-black text-slate-400">{idx + 1}</td>
-                        <td className="p-4 space-y-1">
-                          <h4 className="font-extrabold text-slate-900 leading-snug">{q.text}</h4>
-                          <div className="flex items-center gap-2 text-xs">
-                            <span className="font-bold text-slate-400">Correct Answer:</span>
-                            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-extrabold rounded-md border border-emerald-200">
-                              ✓ {correctAnswerText}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-extrabold border ${
-                              q.category === 'Crypto'
-                                ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                : q.category === 'Machine Learning'
-                                  ? 'bg-purple-50 text-purple-700 border-purple-200'
-                                  : 'bg-blue-50 text-[#2563EB] border-blue-100'
-                            }`}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => openAddModal(selectedCategory)}
+                  className="flex items-center gap-2 px-5 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md shadow-blue-500/20 active:scale-[0.98]"
+                >
+                  <Plus className="w-4.5 h-4.5" />
+                  <span>+ Add New Question</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Search Bar */}
+            <div className="bg-white border border-blue-100 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-4">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder={`Search inside ${selectedCategory} questions...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                />
+              </div>
+              <span className="text-xs text-slate-500 font-bold shrink-0">
+                Showing {filteredQuestions.length} Questions
+              </span>
+            </div>
+
+            {/* Questions Table */}
+            <div className="bg-white border border-blue-100 rounded-3xl overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-slate-50 text-slate-500 uppercase font-bold border-b border-gray-100">
+                    <tr>
+                      <th className="p-4 w-12 text-center">#</th>
+                      <th className="p-4">Question Text & Correct Answer</th>
+                      <th className="p-4 w-28">Difficulty</th>
+                      <th className="p-4 w-40 text-center">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {filteredQuestions.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="p-12 text-center space-y-3">
+                          <p className="text-slate-500 font-bold text-sm">
+                            No questions found in {selectedCategory}.
+                          </p>
+                          <button
+                            onClick={() => openAddModal(selectedCategory)}
+                            className="px-4 py-2 bg-[#2563EB] text-white text-xs font-bold rounded-xl shadow-sm"
                           >
-                            {q.category}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-xs font-bold rounded-lg uppercase">
-                            {q.difficulty}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => openEditModal(q)}
-                              className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 flex items-center gap-1 transition-all"
-                            >
-                              <Edit3 className="w-3.5 h-3.5" />
-                              <span>Edit</span>
-                            </button>
-                            <button
-                              onClick={() => handleDelete(q.id)}
-                              className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
-                              title="Delete Question"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                            + Add Question to {selectedCategory}
+                          </button>
                         </td>
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                    ) : (
+                      filteredQuestions.map((q, idx) => {
+                        const correctAnswerText = q.options[q.correctOptionIndex] || q.options[0];
+                        return (
+                          <tr key={q.id} className="hover:bg-blue-50/40 transition-colors">
+                            <td className="p-4 text-center font-black text-slate-400">{idx + 1}</td>
+                            <td className="p-4 space-y-1.5">
+                              <h4 className="font-extrabold text-slate-900 leading-snug whitespace-pre-wrap">
+                                {q.text}
+                              </h4>
+                              <div className="flex flex-wrap items-center gap-2 text-xs">
+                                <span className="font-bold text-slate-400">Correct Answer:</span>
+                                <span className="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 font-extrabold rounded-md border border-emerald-200">
+                                  ✓ {correctAnswerText}
+                                </span>
+                              </div>
+                              {q.explanation && (
+                                <p className="text-[11px] text-slate-500 italic">
+                                  Explain: {q.explanation}
+                                </p>
+                              )}
+                            </td>
+                            <td className="p-4">
+                              <span className="px-2.5 py-1 bg-slate-100 text-slate-700 text-xs font-bold rounded-lg uppercase">
+                                {q.difficulty}
+                              </span>
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center justify-center gap-2">
+                                <button
+                                  onClick={() => openEditModal(q)}
+                                  className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#2563EB] font-extrabold text-xs rounded-xl border border-blue-100 flex items-center gap-1 transition-all shadow-sm"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                  <span>Edit / Update</span>
+                                </button>
+                                <button
+                                  onClick={() => handleDelete(q.id)}
+                                  className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-bold rounded-xl border border-red-100 transition-all"
+                                  title="Delete Question"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </main>
 
       {/* ADD QUESTION MODAL */}
       {isAddOpen && (
         <div className="fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-xl rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white w-full max-w-xl rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
                 <Plus className="w-5 h-5 text-[#2563EB]" />
-                Add New Question
+                Add New Question ({formCategory})
               </h3>
               <button
                 onClick={() => setIsAddOpen(false)}
@@ -484,11 +676,11 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
             </div>
 
             {/* AI vs Manual Tabs */}
-            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-xl">
+            <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl">
               <button
                 type="button"
                 onClick={() => setActiveAddTab('ai')}
-                className={`flex-1 py-2 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 ${
+                className={`flex-1 py-2 text-xs font-black rounded-xl transition-all flex items-center justify-center gap-1.5 ${
                   activeAddTab === 'ai' ? 'bg-[#2563EB] text-white shadow-sm' : 'text-slate-600'
                 }`}
               >
@@ -517,28 +709,27 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
             {activeAddTab === 'ai' && (
               <div className="p-5 bg-blue-50/60 border border-blue-100 rounded-2xl space-y-4">
                 <div className="space-y-1">
-                  <h4 className="font-black text-sm text-slate-900">
-                    Select Category & Topic for AI
-                  </h4>
+                  <h4 className="font-black text-sm text-slate-900">Generate Question with AI</h4>
                   <p className="text-xs text-slate-500">
-                    The AI will generate Question, 4 Options, Correct Answer, and Explanation
-                    automatically.
+                    Select a category and write a detailed topic prompt to generate an accurate
+                    question, 4 choice options, and explanation.
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-extrabold text-slate-700">Category</label>
+                    <label className="text-xs font-extrabold text-slate-700">Target Category</label>
                     <select
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-blue-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none"
                     >
+                      <option value="Coding">Coding</option>
+                      <option value="Python">Python</option>
                       <option value="AI">AI</option>
                       <option value="Crypto">Crypto</option>
                       <option value="Machine Learning">Machine Learning</option>
                       <option value="Web3">Web3</option>
-                      <option value="Python">Python</option>
                       <option value="custom">Custom Category...</option>
                     </select>
                   </div>
@@ -550,9 +741,9 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                       onChange={(e) => setFormDifficulty(e.target.value)}
                       className="w-full px-3.5 py-2.5 bg-white border border-blue-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none"
                     >
-                      <option value="beginner">Beginner</option>
-                      <option value="intermediate">Intermediate</option>
-                      <option value="advanced">Advanced</option>
+                      <option value="beginner">Beginner / Easy</option>
+                      <option value="intermediate">Intermediate / Medium</option>
+                      <option value="advanced">Advanced / Hard</option>
                     </select>
                   </div>
                 </div>
@@ -564,7 +755,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                     </label>
                     <input
                       type="text"
-                      placeholder="e.g. Machine Learning, Data Science"
+                      placeholder="e.g. JavaScript, React, Data Structures"
                       value={customCategory}
                       onChange={(e) => setCustomCategory(e.target.value)}
                       className="w-full px-3.5 py-2 bg-white border border-blue-200 rounded-xl text-xs text-slate-900"
@@ -575,7 +766,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                 {/* Quick Topic Chips */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700 block">
-                    Popular Topics (Click to generate):
+                    Popular Topic Suggestions (Click to select):
                   </label>
                   <div className="flex flex-wrap gap-1.5">
                     {(formCategory === 'Crypto'
@@ -593,13 +784,21 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                             'Overfitting Mitigation',
                             'Random Forests',
                           ]
-                        : [
-                            'Self Attention',
-                            'RLHF Alignment',
-                            'Vector Embeddings',
-                            'Fine Tuning',
-                            'Neural Networks',
-                          ]
+                        : formCategory === 'Python' || formCategory === 'Coding'
+                          ? [
+                              'Python recursion & base case output',
+                              'List comprehensions & lambda',
+                              'Async/Await event loop',
+                              'Data Structures & Array manipulation',
+                              'OOP Inheritance & Polymorphism',
+                            ]
+                          : [
+                              'Self Attention Transformer',
+                              'RLHF Alignment',
+                              'Vector Embeddings',
+                              'Fine Tuning LLMs',
+                              'Neural Networks',
+                            ]
                     ).map((tItem) => (
                       <button
                         key={tItem}
@@ -618,28 +817,30 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
 
                 <div className="space-y-1.5 pt-2">
                   <label className="text-xs font-extrabold text-slate-700">
-                    Or Type Custom Topic Prompt
+                    Write in detail about topic to get accurate question:
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="e.g. Gradient Descent, Context Windows"
-                      value={aiTopic}
-                      onChange={(e) => setAiTopic(e.target.value)}
-                      className="flex-1 px-3.5 py-2 bg-white border border-blue-200 rounded-xl text-xs text-slate-900 focus:outline-none"
-                    />
+                  <textarea
+                    rows={3}
+                    placeholder="Write in detail about topic to get accurate question (e.g. 'Python recursive function calls, base cases, and step-by-step output tracing')"
+                    value={aiTopic}
+                    onChange={(e) => setAiTopic(e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-white border border-blue-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#2563EB]"
+                  />
+                  <div className="flex justify-end pt-1">
                     <button
                       type="button"
                       onClick={() => handleGenerateWithAI()}
                       disabled={generatingAI}
-                      className="px-4 py-2 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-1.5 disabled:opacity-50 shrink-0"
+                      className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-extrabold rounded-xl shadow-md flex items-center gap-1.5 disabled:opacity-50"
                     >
                       {generatingAI ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                       ) : (
                         <Sparkles className="w-4 h-4" />
                       )}
-                      <span>{generatingAI ? 'Generating...' : 'Generate Question'}</span>
+                      <span>
+                        {generatingAI ? 'Generating Question...' : '✨ Generate Question with AI'}
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -655,7 +856,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                     placeholder="Enter question text..."
                     value={formText}
                     onChange={(e) => setFormText(e.target.value)}
-                    rows={2}
+                    rows={3}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                     required
                   />
@@ -702,11 +903,12 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                       onChange={(e) => setFormCategory(e.target.value)}
                       className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none"
                     >
+                      <option value="Coding">Coding</option>
+                      <option value="Python">Python</option>
                       <option value="AI">AI</option>
                       <option value="Crypto">Crypto</option>
                       <option value="Machine Learning">Machine Learning</option>
                       <option value="Web3">Web3</option>
-                      <option value="Python">Python</option>
                       <option value="custom">Custom Category...</option>
                     </select>
                   </div>
@@ -777,11 +979,11 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
       {/* EDIT QUESTION MODAL */}
       {editingQuestion && (
         <div className="fixed inset-0 z-[200] bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-xl rounded-2xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white w-full max-w-xl rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-gray-100 pb-3">
               <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
                 <Edit3 className="w-5 h-5 text-[#2563EB]" />
-                Edit Question
+                Edit / Update Question ({formCategory})
               </h3>
               <button
                 onClick={() => setEditingQuestion(null)}
@@ -803,7 +1005,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                 <textarea
                   value={formText}
                   onChange={(e) => setFormText(e.target.value)}
-                  rows={2}
+                  rows={3}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-[#2563EB]"
                   required
                 />
@@ -812,7 +1014,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
               {/* 4 Options */}
               <div className="space-y-2">
                 <label className="text-xs font-extrabold text-slate-700 block">
-                  4 Choice Options
+                  4 Choice Options (Select radio for Correct Answer)
                 </label>
                 {[
                   { val: formOption0, set: setFormOption0, letter: 'A', index: 0 },
@@ -833,6 +1035,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                     </span>
                     <input
                       type="text"
+                      placeholder={`Option ${opt.letter}`}
                       value={opt.val}
                       onChange={(e) => opt.set(e.target.value)}
                       className="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#2563EB]"
@@ -845,19 +1048,16 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700">Category</label>
                   <select
-                    value={
-                      ['AI', 'Crypto', 'Machine Learning', 'Web3', 'Python'].includes(formCategory)
-                        ? formCategory
-                        : 'custom'
-                    }
+                    value={formCategory}
                     onChange={(e) => setFormCategory(e.target.value)}
                     className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none"
                   >
+                    <option value="Coding">Coding</option>
+                    <option value="Python">Python</option>
                     <option value="AI">AI</option>
                     <option value="Crypto">Crypto</option>
                     <option value="Machine Learning">Machine Learning</option>
                     <option value="Web3">Web3</option>
-                    <option value="Python">Python</option>
                     <option value="custom">Custom Category...</option>
                   </select>
                 </div>
@@ -876,15 +1076,14 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                 </div>
               </div>
 
-              {(formCategory === 'custom' ||
-                (!['AI', 'Crypto', 'Machine Learning', 'Web3', 'Python'].includes(formCategory) &&
-                  formCategory !== '')) && (
+              {formCategory === 'custom' && (
                 <div className="space-y-1.5">
                   <label className="text-xs font-extrabold text-slate-700">
                     Custom Category Name
                   </label>
                   <input
                     type="text"
+                    placeholder="e.g. Machine Learning, Data Science"
                     value={customCategory}
                     onChange={(e) => setCustomCategory(e.target.value)}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:border-[#2563EB]"
@@ -895,6 +1094,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
               <div className="space-y-1.5">
                 <label className="text-xs font-extrabold text-slate-700">Explanation</label>
                 <textarea
+                  placeholder="Briefly explain why this option is correct..."
                   value={formExplanation}
                   onChange={(e) => setFormExplanation(e.target.value)}
                   rows={2}
@@ -916,7 +1116,7 @@ export function AdminQuestionsClient({ locale, initialQuestions }: AdminQuestion
                   className="px-5 py-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-extrabold text-xs rounded-xl shadow-md flex items-center gap-1.5 disabled:opacity-50"
                 >
                   {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-                  <span>{loading ? 'Updating...' : 'Update Question DB'}</span>
+                  <span>{loading ? 'Updating...' : 'Update Question'}</span>
                 </button>
               </div>
             </form>
