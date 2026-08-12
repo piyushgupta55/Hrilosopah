@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 
 function randomizeCorrectOption(optionsArr: string[], originalCorrectIdx: number) {
-  if (!optionsArr || optionsArr.length === 0) return { options: optionsArr || [], correctIdx: 0 };
+  if (!optionsArr || optionsArr.length < 2) return { options: optionsArr || [], correctIdx: 0 };
   const safeIdx = Math.max(0, Math.min(originalCorrectIdx, optionsArr.length - 1));
-  return { options: optionsArr, correctIdx: safeIdx };
+  const correctAnswerText = optionsArr[safeIdx];
+
+  // Perform Fisher-Yates shuffle on options to randomly place correct answer across A, B, C, or D
+  const shuffled = [...optionsArr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+
+  const newCorrectIdx = shuffled.indexOf(correctAnswerText);
+  return { options: shuffled, correctIdx: newCorrectIdx >= 0 ? newCorrectIdx : 0 };
 }
 
 export async function POST(req: Request) {
@@ -156,27 +166,27 @@ export async function POST(req: Request) {
     const codingQuestions = [
       {
         text: 'What is the output of the following Python code snippet?\n\ndef compute(n):\n    if n <= 1: return 1\n    return n * compute(n - 1)\n\nprint(compute(4))',
-        options: ['24', '12', '4', 'RecursionError'],
-        correctOptionIndex: 0,
+        options: ['12', '24', '4', 'RecursionError'],
+        correctOptionIndex: 1,
         explanation:
           'compute(4) computes 4 * 3 * 2 * 1 = 24 using recursive factorial multiplication.',
       },
       {
         text: 'Which data structure offers O(1) average time complexity for key lookups and insertions?',
         options: [
-          'Hash Table / Hash Map',
           'Binary Search Tree',
           'Sorted Array',
+          'Hash Table / Hash Map',
           'Singly Linked List',
         ],
-        correctOptionIndex: 0,
+        correctOptionIndex: 2,
         explanation:
           'Hash Tables compute direct index mappings using hash functions, offering O(1) average lookup and insertion time.',
       },
       {
         text: 'In Python, what does a list comprehension like [x**2 for x in range(5) if x % 2 == 0] evaluate to?',
-        options: ['[0, 4, 16]', '[1, 9, 25]', '[0, 1, 4, 9, 16]', '[0, 2, 4]'],
-        correctOptionIndex: 0,
+        options: ['[1, 9, 25]', '[0, 1, 4, 9, 16]', '[0, 2, 4]', '[0, 4, 16]'],
+        correctOptionIndex: 3,
         explanation: 'Even numbers in range(5) are 0, 2, 4. Squaring them yields [0, 4, 16].',
       },
     ];
@@ -185,24 +195,24 @@ export async function POST(req: Request) {
       {
         text: 'What is the main advantage of Multi-Head Self-Attention in Transformer models?',
         options: [
-          'Allows the model to jointly attend to information from different representation subspaces at different positions',
           'Reduces memory usage by disabling backpropagation',
+          'Allows the model to jointly attend to information from different representation subspaces at different positions',
           'Replaces all matrix multiplications with addition',
           'Enforces strictly one-directional linear token processing',
         ],
-        correctOptionIndex: 0,
+        correctOptionIndex: 1,
         explanation:
           'Multi-Head Attention projects queries, keys, and values into multiple subspaces, letting the network capture diverse contextual relationships simultaneously.',
       },
       {
         text: 'What does RLHF (Reinforcement Learning from Human Feedback) optimize in LLM deployment?',
         options: [
-          'Aligns model outputs with human intent, safety, and helpfulness guidelines',
           'Compresses model parameter weights for mobile hardware',
           'Deletes duplicate dataset files during pretraining',
+          'Aligns model outputs with human intent, safety, and helpfulness guidelines',
           'Converts natural language queries directly into SQL queries',
         ],
-        correctOptionIndex: 0,
+        correctOptionIndex: 2,
         explanation:
           'RLHF uses reward models trained on human preferences to fine-tune raw LLM outputs toward helpfulness and safety.',
       },
@@ -224,24 +234,24 @@ export async function POST(req: Request) {
       {
         text: 'In Proof-of-Stake (PoS) blockchains, how are block validators selected?',
         options: [
-          'Based on the proportion of native cryptocurrency tokens they stake as collateral',
           'Based on who owns the fastest ASIC hardware mining rig',
-          'Through manual review by a central central bank authority',
+          'Based on the proportion of native cryptocurrency tokens they stake as collateral',
+          'Through manual review by a central bank authority',
           'At random intervals without economic collateral',
         ],
-        correctOptionIndex: 0,
+        correctOptionIndex: 1,
         explanation:
           'Proof-of-Stake replaces hardware mining with economic stake, choosing validators proportionally to their locked token collateral.',
       },
       {
         text: 'What is a Zero-Knowledge Proof (ZKP) in blockchain transactions?',
         options: [
-          'A cryptographic technique to prove a transaction statement is valid without revealing private details',
           'A public record with zero encryption keys',
           'A consensus algorithm used only for layer-1 testnets',
+          'A cryptographic technique to prove a transaction statement is valid without revealing private details',
           'A fallback emergency shutdown signal',
         ],
-        correctOptionIndex: 0,
+        correctOptionIndex: 2,
         explanation:
           'Zero-Knowledge Proofs allow one party to demonstrate the truth of a statement to another without exposing confidential inputs.',
       },
