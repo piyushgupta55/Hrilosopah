@@ -59,13 +59,13 @@ export default async function LocalizedEmbedQuizPage({
       include: {
         questions: {
           where: { status: 'approved' },
+          orderBy: { order: 'asc' },
         },
       },
     });
 
     if (quiz) {
-      const shuffledQuestions = [...quiz.questions].sort(() => 0.5 - Math.random()).slice(0, 15);
-      const safeQuestions = shuffledQuestions.map((q) => {
+      const safeQuestions = quiz.questions.map((q) => {
         let parsedOptions = [];
         try {
           parsedOptions = typeof q.options === 'string' ? JSON.parse(q.options) : q.options || [];

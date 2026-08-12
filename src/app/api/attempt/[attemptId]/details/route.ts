@@ -8,7 +8,9 @@ export async function GET(request: Request, { params }: { params: { attemptId: s
       include: {
         quiz: {
           include: {
-            questions: true,
+            questions: {
+              orderBy: { order: 'asc' },
+            },
             translations: true,
           },
         },

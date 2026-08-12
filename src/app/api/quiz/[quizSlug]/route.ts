@@ -54,6 +54,7 @@ export async function GET(request: Request, { params }: { params: { quizSlug: st
       include: {
         questions: {
           where: { status: 'approved' },
+          orderBy: { order: 'asc' },
         },
       },
     });
