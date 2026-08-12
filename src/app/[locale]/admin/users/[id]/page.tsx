@@ -80,25 +80,25 @@ export default function AdminUserDetailPage() {
   const [showStatusModal, setShowStatusModal] = useState<boolean>(false);
   const [statusLoading, setStatusLoading] = useState<boolean>(false);
 
-  const fetchUserDetails = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`/api/admin/users?id=${userId}`, { cache: 'no-store' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to load learner details.');
-      setUser(data.user);
-      setNewStreakValue(data.user.currentStreak || 0);
-    } catch (err: any) {
-      console.error('Fetch user detail error:', err);
-      setError(err.message || 'Learner record not found.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (userId) fetchUserDetails();
+    if (!userId) return;
+    const loadUser = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const res = await fetch(`/api/admin/users?id=${userId}`, { cache: 'no-store' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to fetch user details');
+        setUser(data.user);
+        setNewStreakValue(data.user.currentStreak || 0);
+      } catch (err: any) {
+        console.error('Fetch user detail error:', err);
+        setError(err.message || 'Learner record not found.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUser();
   }, [userId]);
 
   // Reset streak handler

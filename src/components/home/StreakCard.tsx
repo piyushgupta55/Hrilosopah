@@ -106,26 +106,26 @@ export const StreakCard = ({
       {/* Streak Detail Interactive Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="w-full max-w-sm bg-[#121722] border border-white/10 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden"
+              className="w-full max-w-sm bg-white border border-gray-100 rounded-3xl p-6 text-gray-900 shadow-2xl relative overflow-hidden"
             >
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-gray-400 hover:text-white transition-colors"
+                className="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
 
               <div className="flex flex-col items-center text-center mt-2 mb-6">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-xl shadow-orange-500/30 mb-3">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-orange-400 flex items-center justify-center shadow-lg shadow-orange-500/20 mb-3">
                   <Flame className="w-10 h-10 text-white fill-white animate-pulse" />
                 </div>
-                <h3 className="text-2xl font-black text-white">{streakDays} Day Streak!</h3>
-                <p className="text-xs text-gray-400 mt-1 max-w-[220px]">
+                <h3 className="text-2xl font-black text-gray-900">{streakDays} Day Streak!</h3>
+                <p className="text-xs text-gray-500 mt-1 max-w-[220px]">
                   {streakDays > 0
                     ? `You've completed quizzes ${streakDays} ${streakDays === 1 ? 'day' : 'days'} in a row! Keep practicing daily to protect your streak.`
                     : 'Complete a quiz today to start your learning streak!'}
@@ -133,32 +133,32 @@ export const StreakCard = ({
               </div>
 
               <div className="space-y-3 mb-6">
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/80">
                   <div className="flex items-center gap-3">
-                    <Shield className="w-5 h-5 text-blue-400" />
+                    <Shield className="w-5 h-5 text-blue-600" />
                     <div className="text-left">
-                      <div className="text-xs font-bold text-white">Streak Freeze</div>
-                      <div className="text-[10px] text-gray-400">1 active protection</div>
+                      <div className="text-xs font-bold text-gray-900">Streak Freeze</div>
+                      <div className="text-[10px] text-gray-500">1 active protection</div>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
+                  <span className="px-3 py-1 rounded-[12px] bg-emerald-600 text-white text-[11px] font-bold shadow-sm">
                     Active
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50/60 border border-blue-100/80">
                   <div className="flex items-center gap-3">
-                    <Zap className="w-5 h-5 text-amber-400" />
+                    <Zap className="w-5 h-5 text-amber-500" />
                     <div className="text-left">
-                      <div className="text-xs font-bold text-white">Daily Goal</div>
-                      <div className="text-[10px] text-gray-400">
+                      <div className="text-xs font-bold text-gray-900">Daily Goal</div>
+                      <div className="text-[10px] text-gray-500">
                         {streakDays > 0 ? 'Quiz completed today' : 'No quiz completed today'}
                       </div>
                     </div>
                   </div>
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                      streakDays > 0 ? 'bg-blue-500/20 text-blue-400' : 'bg-white/10 text-gray-400'
+                    className={`px-3 py-1 rounded-[12px] text-[11px] font-bold shadow-sm ${
+                      streakDays > 0 ? 'bg-blue-600 text-white' : 'bg-slate-700 text-white'
                     }`}
                   >
                     {streakDays > 0 ? 'Completed' : 'Pending'}
@@ -169,7 +169,7 @@ export const StreakCard = ({
               <Link
                 href={`/${locale}/quiz/ai-awareness`}
                 onClick={() => setShowModal(false)}
-                className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition-all active:scale-[0.98]"
+                className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-600/25 transition-all active:scale-[0.98]"
               >
                 <span>Continue Today&apos;s Quiz</span>
               </Link>

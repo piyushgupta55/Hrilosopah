@@ -124,7 +124,8 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                   .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
                   .join(' ');
 
-              const totalQs = quiz.questions?.length || 10;
+              const hasQuestions = quiz.questions && quiz.questions.length > 0;
+              const totalQs = quiz.questions?.length || 0;
               const prog = getQuizProgress(quiz.slug, totalQs);
               const levelNum =
                 quiz.difficulty === 'advanced' ? 3 : quiz.difficulty === 'intermediate' ? 2 : 1;
@@ -135,7 +136,7 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                     className={`w-44 h-60 rounded-2xl bg-gradient-to-br ${gradient} p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0 hover:shadow-lg transition-all hover:-translate-y-0.5`}
                   >
                     <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-3">
-                      {tCards('level', { num: levelNum })}
+                      {hasQuestions ? tCards('level', { num: levelNum }) : 'Coming Soon'}
                     </div>
                     <div className="self-center mb-3 mt-1 flex items-center justify-center">
                       <IconComp
@@ -149,13 +150,13 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                     <div className="w-full">
                       <div className="flex justify-between items-center text-[10px] font-bold mb-1 text-white/90">
                         <span>
-                          {prog.score} / {prog.total}
+                          {hasQuestions ? `${prog.score} / ${prog.total}` : 'Coming Soon'}
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-black/20 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-white rounded-full transition-all duration-300"
-                          style={{ width: `${prog.pct}%` }}
+                          style={{ width: `${hasQuestions ? prog.pct : 0}%` }}
                         ></div>
                       </div>
                     </div>
@@ -224,30 +225,32 @@ export default async function PlayPage({ params: { locale } }: { params: { local
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-[#7E57C2] to-[#5E35B1] rounded-xl p-5 text-white shadow-md relative overflow-hidden">
-          <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-20 text-8xl transform rotate-12 blur-[2px]">
-            <Gift className="w-24 h-24" />
-          </div>
+        <Link href={`/${locale}/quiz/blockchain-basics`}>
+          <div className="bg-gradient-to-r from-[#7E57C2] to-[#5E35B1] rounded-xl p-5 text-white shadow-md relative overflow-hidden hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-20 text-8xl transform rotate-12 blur-[2px]">
+              <Gift className="w-24 h-24" />
+            </div>
 
-          <div className="relative z-10">
-            <h4 className="font-bold text-lg mb-1">{tCards('blockchainBasicsChallenge')}</h4>
-            <p className="text-white/80 text-sm mb-5 pr-12">
-              {tCards('blockchainBasicsChallengeDesc')}
-            </p>
+            <div className="relative z-10">
+              <h4 className="font-bold text-lg mb-1">{tCards('blockchainBasicsChallenge')}</h4>
+              <p className="text-white/80 text-sm mb-5 pr-12">
+                {tCards('blockchainBasicsChallengeDesc')}
+              </p>
 
-            <div className="flex items-center gap-3">
-              <div className="flex-1">
-                <div className="text-[10px] font-semibold mb-1.5 text-white/90">0 / 10</div>
-                <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
-                  <div className="h-full bg-white rounded-full" style={{ width: '0%' }}></div>
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <div className="text-[10px] font-semibold mb-1.5 text-white/90">0 / 10</div>
+                  <div className="w-full h-2 bg-black/20 rounded-full overflow-hidden">
+                    <div className="h-full bg-white rounded-full" style={{ width: '0%' }}></div>
+                  </div>
                 </div>
-              </div>
-              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm shrink-0 shadow-sm border border-white/20">
-                <span className="text-xl">🎁</span>
+                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm shrink-0 shadow-sm border border-white/20">
+                  <span className="text-xl">🎁</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
 
       <BottomNav />

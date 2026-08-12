@@ -237,6 +237,19 @@ export async function PUT(req: Request) {
 
     // Sync questions if questions array provided
     if (Array.isArray(questions)) {
+      // Find existing question IDs to clean up translations first
+      const existingQuestions = await prisma.question.findMany({
+        where: { quizId: id },
+        select: { id: true },
+      });
+      const questionIds = existingQuestions.map((q) => q.id);
+
+      if (questionIds.length > 0) {
+        await prisma.questionTranslation.deleteMany({
+          where: { questionId: { in: questionIds } },
+        });
+      }
+
       // Delete existing questions for this quiz and recreate with updated payload
       await prisma.question.deleteMany({
         where: { quizId: id },
@@ -288,6 +301,31 @@ export async function DELETE(req: Request) {
     if (!id) {
       return NextResponse.json({ error: 'Quiz ID is required.' }, { status: 400 });
     }
+
+    // Clean up dependent child records prior to quiz deletion
+    const existingQuestions = await prisma.question.findMany({
+      where: { quizId: id },
+      select: { id: true },
+    });
+    const questionIds = existingQuestions.map((q) => q.id);
+
+    if (questionIds.length > 0) {
+      await prisma.questionTranslation.deleteMany({
+        where: { questionId: { in: questionIds } },
+      });
+    }
+
+    await prisma.question.deleteMany({
+      where: { quizId: id },
+    });
+
+    await prisma.quizTranslation.deleteMany({
+      where: { quizId: id },
+    });
+
+    await prisma.attempt.deleteMany({
+      where: { quizId: id },
+    });
 
     await prisma.quiz.delete({
       where: { id },

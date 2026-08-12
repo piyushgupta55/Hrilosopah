@@ -59,8 +59,7 @@ export async function GET(request: Request, { params }: { params: { quizSlug: st
     });
 
     if (quiz) {
-      const shuffledQuestions = [...quiz.questions].sort(() => 0.5 - Math.random()).slice(0, 15);
-      const safeQuestions = shuffledQuestions.map((q) => {
+      const safeQuestions = quiz.questions.map((q) => {
         let parsedOptions = [];
         try {
           parsedOptions = typeof q.options === 'string' ? JSON.parse(q.options) : q.options || [];
@@ -71,6 +70,8 @@ export async function GET(request: Request, { params }: { params: { quizSlug: st
           id: q.id,
           text: q.text,
           options: parsedOptions,
+          correctOptionIndex: typeof q.correctOptionIndex === 'number' ? q.correctOptionIndex : 0,
+          explanation: q.explanation || null,
           difficulty: q.difficulty,
         };
       });

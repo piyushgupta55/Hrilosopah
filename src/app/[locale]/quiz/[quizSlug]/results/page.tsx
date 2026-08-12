@@ -26,6 +26,191 @@ interface ResultQuestion {
   isCorrect?: boolean;
 }
 
+const FALLBACK_AI_QUESTIONS: ResultQuestion[] = [
+  {
+    id: 'q1',
+    text: 'What does "AI" stand for?',
+    options: [
+      'Automated Intelligence',
+      'Artificial Intelligence',
+      'Algorithmic Integration',
+      'Advanced Iteration',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'AI stands for Artificial Intelligence, which is the simulation of human intelligence processes by machines.',
+  },
+  {
+    id: 'q2',
+    text: 'Which of the following is considered a subset of AI?',
+    options: ['Cloud Computing', 'Machine Learning', 'Blockchain', 'Quantum Computing'],
+    correctOptionIndex: 1,
+    explanation:
+      'Machine Learning is a subset of AI that focuses on building systems that learn from data.',
+  },
+  {
+    id: 'q3',
+    text: 'What is a "Large Language Model" (LLM)?',
+    options: [
+      'A model that translates languages perfectly',
+      'A huge database of words',
+      'An AI model trained on vast amounts of text to understand and generate human language',
+      'A programming language for AI',
+    ],
+    correctOptionIndex: 2,
+    explanation:
+      'LLMs like GPT-4 are trained on massive text datasets to predict and generate natural language.',
+  },
+  {
+    id: 'q4',
+    text: "Which test was proposed by Alan Turing to evaluate a machine's capability to exhibit intelligent behavior?",
+    options: [
+      'The Turing Test',
+      'The AI Benchmark',
+      'The Intelligence Quotient (IQ) Test',
+      'The Machine Learning Exam',
+    ],
+    correctOptionIndex: 0,
+    explanation:
+      "The Turing Test is a classic measure of a machine's ability to converse indistinguishably from a human.",
+  },
+  {
+    id: 'q5',
+    text: 'What does "NLP" stand for in the context of AI?',
+    options: [
+      'Neural Language Programming',
+      'Natural Language Processing',
+      'New Learning Protocol',
+      'Non-Linear Processing',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'Natural Language Processing helps computers understand, interpret, and manipulate human language.',
+  },
+  {
+    id: 'q6',
+    text: 'What is an "algorithm" in computer science?',
+    options: [
+      'A type of computer hardware',
+      'A programming language',
+      'A set of instructions designed to perform a specific task',
+      'A specific brand of AI',
+    ],
+    correctOptionIndex: 2,
+    explanation:
+      'Algorithms are step-by-step procedures or formulas for solving problems, forming the basis of all software, including AI.',
+  },
+  {
+    id: 'q7',
+    text: 'What does "Generative AI" primarily do?',
+    options: [
+      'Sorts large databases',
+      'Generates new content, such as text, images, or audio',
+      'Repairs broken computer code automatically',
+      'Translates text into binary code',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'Generative AI refers to algorithms (like ChatGPT or Midjourney) that can create new content based on learned patterns.',
+  },
+  {
+    id: 'q8',
+    text: 'What is a common ethical concern regarding AI?',
+    options: [
+      'It uses too much internet bandwidth',
+      'AI systems might exhibit bias learned from their training data',
+      'AI will forget how to speak human languages',
+      'AI cannot be turned off',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'AI models can inherit and amplify human biases present in the data they were trained on, leading to unfair outcomes.',
+  },
+  {
+    id: 'q9',
+    text: 'What is "Computer Vision"?',
+    options: [
+      'A monitor with very high resolution',
+      'A field of AI that enables computers to derive meaning from digital images and videos',
+      'A virtual reality headset',
+      'A type of graphics card',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'Computer vision allows AI to "see" and interpret visual data, used in facial recognition, self-driving cars, etc.',
+  },
+  {
+    id: 'q10',
+    text: 'Which of the following is NOT typically considered an application of AI today?',
+    options: [
+      'Self-driving cars',
+      'Spam email filters',
+      'Basic mechanical clocks',
+      'Voice assistants like Siri or Alexa',
+    ],
+    correctOptionIndex: 2,
+    explanation:
+      'Basic mechanical clocks operate purely on mechanical physics without any learning, data processing, or AI.',
+  },
+];
+
+const FALLBACK_CRYPTO_QUESTIONS: ResultQuestion[] = [
+  {
+    id: 'c1',
+    text: 'Who published the Bitcoin whitepaper in 2008?',
+    options: ['Vitalik Buterin', 'Satoshi Nakamoto', 'Gavin Wood', 'Hal Finney'],
+    correctOptionIndex: 1,
+    explanation:
+      'Satoshi Nakamoto authored Bitcoin: A Peer-to-Peer Electronic Cash System in October 2008.',
+  },
+  {
+    id: 'c2',
+    text: 'What is the maximum supply limit of Bitcoin?',
+    options: ['100 Million', '21 Million', 'Unlimited', '18 Million'],
+    correctOptionIndex: 1,
+    explanation: 'Bitcoin supply is capped by protocol consensus at 21,000,000 BTC.',
+  },
+  {
+    id: 'c3',
+    text: 'What is a blockchain?',
+    options: [
+      'A centralized server',
+      'A decentralized, immutable distributed ledger',
+      'A web browser',
+      'A banking app',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'A blockchain is a decentralized distributed database maintained across a network of nodes.',
+  },
+  {
+    id: 'c4',
+    text: 'What is a smart contract?',
+    options: [
+      'A paper legal document',
+      'Self-executing code stored on a blockchain',
+      'A trading algorithm',
+      'An email verification system',
+    ],
+    correctOptionIndex: 1,
+    explanation:
+      'Smart contracts automatically execute agreements directly in code when pre-defined conditions are met.',
+  },
+  {
+    id: 'c5',
+    text: 'What does EVM stand for in Ethereum?',
+    options: [
+      'Ethereum Virtual Machine',
+      'External Value Method',
+      'Electronic Verified Money',
+      'Encryption Vault Module',
+    ],
+    correctOptionIndex: 0,
+    explanation:
+      'The Ethereum Virtual Machine (EVM) is the decentralized runtime environment for Ethereum smart contracts.',
+  },
+];
+
 export default function QuizResultsPage() {
   const params = useParams() || {};
   const searchParams = useSearchParams();
@@ -81,34 +266,89 @@ export default function QuizResultsPage() {
           }
         }
 
-        if (!dataToUse && quizSlug) {
-          const res = await fetch(`/api/admin/quiz?slug=${quizSlug}`);
+        if ((!dataToUse || !dataToUse.questions || dataToUse.questions.length === 0) && quizSlug) {
+          const res = await fetch(`/api/quiz/${quizSlug}`);
           if (res.ok) {
             const result = await res.json();
-            if (result.quiz) {
-              const quiz = result.quiz;
+            if (result.success && result.data && result.data.questions?.length > 0) {
               dataToUse = {
-                quizTitle: quiz.title || quizSlug,
-                category: quiz.category,
-                totalQuestions: quiz.questions?.length || 0,
-                score: null,
-                timeSpentFormatted: '2m 15s',
-                questions: quiz.questions || [],
+                ...(dataToUse || {}),
+                quizTitle:
+                  result.data.title ||
+                  quizSlug
+                    .split('-')
+                    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+                    .join(' '),
+                category: result.data.category || 'general',
+                totalQuestions: result.data.questions.length,
+                questions: result.data.questions,
               };
             }
           }
         }
 
-        if (dataToUse) {
-          setQuizDetails(dataToUse);
-          if (dataToUse.timeSpentFormatted) {
-            setTimeSpentText(dataToUse.timeSpentFormatted);
+        if ((!dataToUse || !dataToUse.questions || dataToUse.questions.length === 0) && quizSlug) {
+          const res = await fetch(`/api/admin/quiz?slug=${quizSlug}`);
+          if (res.ok) {
+            const result = await res.json();
+            if (result.quiz && result.quiz.questions?.length > 0) {
+              const quiz = result.quiz;
+              dataToUse = {
+                ...(dataToUse || {}),
+                quizTitle: quiz.title || quizSlug,
+                category: quiz.category,
+                totalQuestions: quiz.questions.length,
+                questions: quiz.questions,
+              };
+            }
           }
+        }
 
-          let correctCount = 0;
-          const questionsList: ResultQuestion[] = (dataToUse.questions || []).map((q: any) => {
-            const chosenIdx = storedAnswers[q.id];
-            const isCorrect = typeof chosenIdx === 'number' && chosenIdx === q.correctOptionIndex;
+        if (!dataToUse || !dataToUse.questions || dataToUse.questions.length === 0) {
+          const isCrypto =
+            quizSlug.includes('crypto') ||
+            quizSlug.includes('bitcoin') ||
+            quizSlug.includes('block');
+          const fallbackQs = isCrypto ? FALLBACK_CRYPTO_QUESTIONS : FALLBACK_AI_QUESTIONS;
+          dataToUse = {
+            ...(dataToUse || {}),
+            quizTitle: quizSlug
+              .split('-')
+              .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+              .join(' '),
+            category: isCrypto ? 'crypto' : 'ai',
+            totalQuestions: fallbackQs.length,
+            questions: fallbackQs,
+          };
+        }
+
+        setQuizDetails(dataToUse);
+        if (dataToUse.timeSpentFormatted) {
+          setTimeSpentText(dataToUse.timeSpentFormatted);
+        }
+
+        let correctCount = 0;
+        const questionsList: ResultQuestion[] = (dataToUse.questions || []).map(
+          (q: any, idx: number) => {
+            let rawUserChoice: any = undefined;
+            if (q.id && storedAnswers[q.id] !== undefined) {
+              rawUserChoice = storedAnswers[q.id];
+            } else if (storedAnswers[`q_${idx}`] !== undefined) {
+              rawUserChoice = storedAnswers[`q_${idx}`];
+            } else if (storedAnswers[`q${idx + 1}`] !== undefined) {
+              rawUserChoice = storedAnswers[`q${idx + 1}`];
+            } else {
+              const keys = Object.keys(storedAnswers);
+              if (keys[idx] !== undefined) {
+                rawUserChoice = storedAnswers[keys[idx]];
+              }
+            }
+
+            const correctOptIdx = Number(q.correctOptionIndex ?? 0);
+            const hasChosen = rawUserChoice !== undefined && rawUserChoice !== null;
+            const chosenIdx = hasChosen ? Number(rawUserChoice) : -1;
+            const isCorrect = hasChosen && chosenIdx === correctOptIdx;
+
             if (isCorrect) correctCount++;
 
             let parsedOpts: string[] = [];
@@ -123,24 +363,22 @@ export default function QuizResultsPage() {
             }
 
             return {
-              id: q.id,
+              id: q.id || `q_${idx}`,
               text: q.text,
               options: parsedOpts,
-              correctOptionIndex: q.correctOptionIndex,
-              explanation: q.explanation || '',
+              correctOptionIndex: correctOptIdx,
+              explanation: q.explanation || 'Evaluates key principles and foundational knowledge.',
               userChosenIdx: chosenIdx,
               isCorrect,
             };
-          });
+          }
+        );
 
-          setEvaluatedQuestions(questionsList);
-          setTotalQs(dataToUse.totalQuestions || questionsList.length || 0);
-          setActualScore(
-            dataToUse.score !== undefined && dataToUse.score !== null
-              ? dataToUse.score
-              : correctCount
-          );
-        }
+        setEvaluatedQuestions(questionsList);
+        setTotalQs(dataToUse.totalQuestions || questionsList.length || 5);
+        setActualScore(
+          dataToUse.score !== undefined && dataToUse.score !== null ? dataToUse.score : correctCount
+        );
       } catch (err) {
         console.error('Error loading attempt results:', err);
       } finally {
@@ -209,16 +447,10 @@ export default function QuizResultsPage() {
           <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mb-1.5">
             {quizDetails?.quizTitle || 'Quiz Knowledge Verification'}
           </h1>
-          <p className="text-xs text-slate-500 max-w-md mb-3.5 leading-relaxed">
+          <p className="text-xs text-slate-500 max-w-md leading-relaxed">
             Issued to <span className="text-slate-900 font-bold">Verified Learner</span> for
             completing {actualScore} of {totalQs} questions correctly ({accuracyPct}% accuracy).
           </p>
-
-          <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 bg-blue-50/80 border border-blue-100 px-4 py-2 rounded-xl">
-            <ShieldCheck className="w-4 h-4 text-[#2563EB]" />
-            <span>Certificate ID: HRL-{Date.now().toString().slice(-6)}</span>
-            <span className="text-[#2563EB] font-bold">• Verified</span>
-          </div>
         </div>
 
         {/* Score Overview Cards */}

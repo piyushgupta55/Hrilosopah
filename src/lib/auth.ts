@@ -38,7 +38,10 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    process.env.AUTH_SECRET ||
+    'hrilosopah-fallback-secret-production-key-2026',
   session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {

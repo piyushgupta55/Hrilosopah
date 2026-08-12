@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { X, Lock, ShieldCheck } from 'lucide-react';
 import { UnlockButton } from '@/components/quiz/UnlockButton';
 
+import { getBaseUrl } from '@/lib/baseUrl';
+
 export default async function SummaryPage({
   searchParams,
   params: { locale, quizSlug },
@@ -13,11 +15,7 @@ export default async function SummaryPage({
   const isUnlocked = searchParams.unlocked === 'true' || searchParams.payment === 'success';
   let summary = null;
 
-  const baseUrl = process.env.NEXTAUTH_URL
-    ? process.env.NEXTAUTH_URL
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : 'http://localhost:3000';
+  const baseUrl = getBaseUrl();
 
   if (attemptId) {
     const res = await fetch(`${baseUrl}/api/attempt/${attemptId}`, {

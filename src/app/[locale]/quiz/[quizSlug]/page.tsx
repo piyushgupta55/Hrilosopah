@@ -4,6 +4,9 @@ import { authOptions } from '@/lib/auth';
 import { QuizDetailWrapper } from '@/components/quiz/QuizDetailWrapper';
 import { prisma } from '@/lib/prisma';
 
+import { Clock } from 'lucide-react';
+import Link from 'next/link';
+
 export default async function QuizPage({
   params,
 }: {
@@ -23,12 +26,21 @@ export default async function QuizPage({
 
   if (!quiz || !quiz.questions || quiz.questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-6 text-center">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">Quiz Questions Coming Soon</h2>
-          <p className="text-sm text-slate-500">
-            No questions have been published for this quiz yet.
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#F8F9FA]">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm w-full flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+            <Clock className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Coming Soon</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            There are no questions available for this quiz right now. Check back soon!
           </p>
+          <Link
+            href={`/${params.locale}/play`}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors text-center text-sm"
+          >
+            Back to Quizzes
+          </Link>
         </div>
       </div>
     );

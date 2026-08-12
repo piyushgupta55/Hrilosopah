@@ -34,9 +34,9 @@ export const QuestionCard = ({
       >
         <div className="bg-white rounded-[24px] p-5 shadow-sm border border-gray-100 relative overflow-hidden">
           {/* Top Tag */}
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-purple-50 rounded-lg mb-4">
-            <Brain className="w-3.5 h-3.5 text-purple-600" strokeWidth={2.5} />
-            <span className="text-[10px] font-bold text-purple-600 tracking-wide">AI Basics</span>
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 rounded-lg mb-4 border border-blue-100">
+            <Brain className="w-3.5 h-3.5 text-[#2563EB]" strokeWidth={2.5} />
+            <span className="text-[10px] font-bold text-[#2563EB] tracking-wide">AI Basics</span>
           </div>
 
           <div className="flex flex-row gap-4 mb-6">
@@ -55,11 +55,11 @@ export const QuestionCard = ({
                 strokeWidth={1}
               />
               <Brain
-                className="w-16 h-16 text-indigo-500 drop-shadow-md relative z-10"
+                className="w-16 h-16 text-[#2563EB] drop-shadow-md relative z-10"
                 strokeWidth={1}
               />
-              <Star className="w-3 h-3 text-purple-300 fill-purple-300 absolute top-0 left-0" />
-              <Star className="w-2 h-2 text-indigo-300 fill-indigo-300 absolute bottom-2 right-0" />
+              <Star className="w-3 h-3 text-blue-400 fill-blue-400 absolute top-0 left-0" />
+              <Star className="w-2 h-2 text-indigo-400 fill-indigo-400 absolute bottom-2 right-0" />
             </div>
           </div>
 

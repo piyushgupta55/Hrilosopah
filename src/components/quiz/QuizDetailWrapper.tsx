@@ -115,60 +115,50 @@ export const QuizDetailWrapper = ({
           </div>
         </div>
 
-        {/* Stats Row */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-          <div className="flex justify-between items-center px-1">
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-                <Clock className="w-4 h-4 text-purple-600" />
-              </div>
-              <span className="font-bold text-gray-900 text-xs">10 Min</span>
-              <span className="text-[9px] text-gray-500">Duration</span>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+          <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mb-2">
+              <Clock className="w-5 h-5 text-purple-600" />
             </div>
+            <span className="font-extrabold text-gray-900 text-xs sm:text-sm">10 Min</span>
+            <span className="text-[10px] text-gray-500 font-medium mt-0.5">Duration</span>
+          </div>
 
-            <div className="w-px h-8 bg-gray-100"></div>
-
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-blue-600" />
-              </div>
-              <span className="font-bold text-gray-900 text-xs">
-                {quizData.questions?.length || 15}
-              </span>
-              <span className="text-[9px] text-gray-500">Questions</span>
+          <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mb-2">
+              <FileText className="w-5 h-5 text-blue-600" />
             </div>
+            <span className="font-extrabold text-gray-900 text-xs sm:text-sm">
+              {quizData.questions?.length || 15}
+            </span>
+            <span className="text-[10px] text-gray-500 font-medium mt-0.5">Questions</span>
+          </div>
 
-            <div className="w-px h-8 bg-gray-100"></div>
-
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
-                <BarChart2 className="w-4 h-4 text-green-600" />
-              </div>
-              <span className="font-bold text-gray-900 text-xs capitalize">
-                {quizData.difficulty || 'Beginner'}
-              </span>
-              <span className="text-[9px] text-gray-500">Difficulty</span>
+          <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mb-2">
+              <BarChart2 className="w-5 h-5 text-green-600" />
             </div>
+            <span className="font-extrabold text-gray-900 text-xs sm:text-sm capitalize">
+              {quizData.difficulty || 'Beginner'}
+            </span>
+            <span className="text-[10px] text-gray-500 font-medium mt-0.5">Difficulty</span>
+          </div>
 
-            <div className="w-px h-8 bg-gray-100"></div>
-
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
-                <Trophy className="w-4 h-4 text-orange-500" />
-              </div>
-              <span className="font-bold text-gray-900 text-xs">50 XP</span>
-              <span className="text-[9px] text-gray-500">Reward</span>
+          <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
+            <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center mb-2">
+              <Trophy className="w-5 h-5 text-orange-500" />
             </div>
+            <span className="font-extrabold text-gray-900 text-xs sm:text-sm">50 XP</span>
+            <span className="text-[10px] text-gray-500 font-medium mt-0.5">Reward</span>
+          </div>
 
-            <div className="w-px h-8 bg-gray-100"></div>
-
-            <div className="flex flex-col items-center gap-1.5">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                <Globe className="w-4 h-4 text-indigo-500" />
-              </div>
-              <span className="font-bold text-gray-900 text-xs">English</span>
-              <span className="text-[9px] text-gray-500">Language</span>
+          <div className="bg-white rounded-2xl p-3.5 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center col-span-2 sm:col-span-1">
+            <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center mb-2">
+              <Globe className="w-5 h-5 text-indigo-500" />
             </div>
+            <span className="font-extrabold text-gray-900 text-xs sm:text-sm">English</span>
+            <span className="text-[10px] text-gray-500 font-medium mt-0.5">Language</span>
           </div>
         </div>
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { QuestionCard } from './QuestionCard';
 import { ProgressBar } from './ProgressBar';
-import { ArrowLeft, Bookmark, ArrowRight, List } from 'lucide-react';
+import { ArrowLeft, Bookmark, ArrowRight, List, Clock } from 'lucide-react';
 
 type Question = {
   id: string;
@@ -31,9 +31,10 @@ export const QuizRunner = ({ quizSlug, attemptId, questions, locale = 'en' }: Qu
 
   const currentQuestion = questions[currentIndex];
   const isLastQuestion = currentIndex === questions.length - 1;
-  const hasAnsweredCurrent = answers[currentQuestion.id] !== undefined;
+  const hasAnsweredCurrent = answers[currentQuestion?.id] !== undefined;
 
   const handleSelectOption = (index: number) => {
+    if (!currentQuestion) return;
     setAnswers((prev) => ({ ...prev, [currentQuestion.id]: index }));
   };
 
@@ -81,7 +82,27 @@ export const QuizRunner = ({ quizSlug, attemptId, questions, locale = 'en' }: Qu
     }
   };
 
-  if (!questions.length) return <div>No questions available</div>;
+  if (!questions || !questions.length) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center p-6 text-center bg-[#F8F9FA]">
+        <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 max-w-sm w-full flex flex-col items-center">
+          <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+            <Clock className="w-8 h-8 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Coming Soon</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            There are no questions available for this quiz right now. Check back soon!
+          </p>
+          <button
+            onClick={() => router.push(`/${locale}/play`)}
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors text-center text-sm"
+          >
+            Back to Quizzes
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-[#F8F9FA] overflow-x-hidden">

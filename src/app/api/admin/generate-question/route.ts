@@ -1,20 +1,9 @@
 import { NextResponse } from 'next/server';
 
 function randomizeCorrectOption(optionsArr: string[], originalCorrectIdx: number) {
-  if (!optionsArr || optionsArr.length <= 1) return { options: optionsArr, correctIdx: 0 };
-
+  if (!optionsArr || optionsArr.length === 0) return { options: optionsArr || [], correctIdx: 0 };
   const safeIdx = Math.max(0, Math.min(originalCorrectIdx, optionsArr.length - 1));
-  const correctOptionText = optionsArr[safeIdx];
-
-  // Pick a random target index for the correct answer
-  const randomTargetIdx = Math.floor(Math.random() * optionsArr.length);
-
-  const newOpts = [...optionsArr];
-  const temp = newOpts[randomTargetIdx];
-  newOpts[randomTargetIdx] = correctOptionText;
-  newOpts[safeIdx] = temp;
-
-  return { options: newOpts, correctIdx: randomTargetIdx };
+  return { options: optionsArr, correctIdx: safeIdx };
 }
 
 export async function POST(req: Request) {

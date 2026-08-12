@@ -4,13 +4,15 @@ import type Stripe from 'stripe';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 
+import { getBaseUrl } from '@/lib/baseUrl';
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     const body = await req.json().catch(() => ({}));
     const { attemptId, quizSlug = 'ai-awareness', locale = 'en' } = body;
 
-    const origin = req.headers.get('origin') || 'http://localhost:3000';
+    const origin = req.headers.get('origin') || getBaseUrl();
 
     // Single $1.00 Plan: Unlock Full Results & Certificate after completing all questions
     const planName = 'Full Quiz Results & Official Certificate Unlock';

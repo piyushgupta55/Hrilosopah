@@ -82,8 +82,9 @@ export async function GET() {
         if (diff > 0) totalTimeSeconds += diff;
       }
 
-      const score = a.score || 0;
-      const qTotal = a.totalQuestions || 15;
+      const score = a.score !== null && a.score !== undefined ? a.score : 0;
+      const qTotal = a.totalQuestions && a.totalQuestions > 0 ? a.totalQuestions : 10;
+
       totalCorrect += score;
       totalQuestions += qTotal;
 
