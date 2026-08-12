@@ -1,6 +1,48 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export async function GET() {
+  try {
+    const rawQuizzes = await prisma.quiz.findMany({
+      include: {
+        _count: {
+          select: { questions: true },
+        },
+        questions: {
+          select: { difficulty: true },
+        },
+        translations: true,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    const quizzes = rawQuizzes.map((q) => {
+      const enTrans = q.translations.find((t) => t.locale === 'en');
+      const difficulty = q.questions[0]?.difficulty || 'beginner';
+
+      return {
+        id: q.id,
+        slug: q.slug,
+        title: enTrans?.title || q.slug.toUpperCase().replace(/-/g, ' '),
+        category: q.category,
+        difficulty,
+        questionsCount: q._count?.questions || q.questions.length || 0,
+        status: q.isActive ? 'Published' : 'Draft',
+        isActive: q.isActive,
+        updatedAt: q.updatedAt.toISOString(),
+      };
+    });
+
+    return NextResponse.json({ success: true, quizzes });
+  } catch (error: any) {
+    console.error('Error fetching admin quizzes:', error);
+    return NextResponse.json(
+      { error: error?.message || 'Failed to fetch quizzes.' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
