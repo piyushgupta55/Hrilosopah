@@ -83,6 +83,7 @@ export async function GET(request: Request, { params }: { params: { quizSlug: st
           id: quiz.id,
           slug: quiz.slug,
           category: quiz.category,
+          difficulty: quiz.difficulty || 'beginner',
           questions: safeQuestions,
         },
       });

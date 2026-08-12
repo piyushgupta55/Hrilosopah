@@ -135,8 +135,15 @@ export default async function PlayPage({ params: { locale } }: { params: { local
                   <div
                     className={`w-44 h-60 rounded-2xl bg-gradient-to-br ${gradient} p-4 text-white flex flex-col relative overflow-hidden shadow-md shrink-0 hover:shadow-lg transition-all hover:-translate-y-0.5`}
                   >
-                    <div className="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-bold self-start mb-3">
-                      {hasQuestions ? tCards('level', { num: levelNum }) : 'Coming Soon'}
+                    <div className="flex items-center justify-between gap-1 mb-3">
+                      <span className="bg-white/25 backdrop-blur-md rounded-full px-2.5 py-1 text-[10px] font-black capitalize tracking-wide shadow-sm">
+                        {quiz.difficulty || 'beginner'}
+                      </span>
+                      {!hasQuestions && (
+                        <span className="bg-amber-400/40 text-white rounded-full px-2 py-0.5 text-[9px] font-extrabold">
+                          Soon
+                        </span>
+                      )}
                     </div>
                     <div className="self-center mb-3 mt-1 flex items-center justify-center">
                       <IconComp
