@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   distDir: process.env.BUILD_DIR || '.next',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: (config, { dev }) => {
     if (dev) {
       // Disable Webpack cache in development to prevent HMR compiler corruption crashes

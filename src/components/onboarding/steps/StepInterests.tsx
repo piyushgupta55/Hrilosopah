@@ -5,14 +5,7 @@ import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { InterestChip } from '../InterestChip';
-import {
-  Link as LinkIcon,
-  Network,
-  BarChart3,
-  Cpu,
-  Briefcase,
-  Lightbulb,
-} from 'lucide-react';
+import { Link as LinkIcon, Network, BarChart3, Cpu, Briefcase, Lightbulb } from 'lucide-react';
 import { RealBitcoinIcon, RealBrainIcon } from '@/components/ui/RealIcons';
 import { useTranslations } from 'next-intl';
 
