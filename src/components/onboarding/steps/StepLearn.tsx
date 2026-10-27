@@ -4,7 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
-import { Brain, Bitcoin, FileQuestion } from 'lucide-react';
+import { FileQuestion } from 'lucide-react';
+import { RealBitcoinIcon, RealBrainIcon } from '@/components/ui/RealIcons';
 import { useTranslations } from 'next-intl';
 
 interface StepLearnProps {
@@ -21,14 +22,14 @@ export const StepLearn = ({ selectedInterests, onChange, onNext }: StepLearnProp
       id: 'ai',
       title: t('aiTitle'),
       desc: t('aiDesc'),
-      icon: <Brain className="w-8 h-8 text-[#8B5CF6]" />,
+      icon: <RealBrainIcon className="w-8 h-8 text-[#8B5CF6]" />,
       bg: 'bg-[#F5F3FF]',
     },
     {
       id: 'crypto',
       title: t('cryptoTitle'),
       desc: t('cryptoDesc'),
-      icon: <Bitcoin className="w-8 h-8 text-[#3B82F6]" />,
+      icon: <RealBitcoinIcon className="w-8 h-8 text-[#3B82F6]" />,
       bg: 'bg-[#E0F2FE]',
     },
     {

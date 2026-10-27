@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { PrimaryButton } from '../PrimaryButton';
 import { StepHeader } from '../StepHeader';
-import { Bitcoin, Brain } from 'lucide-react';
+import { RealBitcoinIcon, RealBrainIcon } from '@/components/ui/RealIcons';
 import { useTranslations } from 'next-intl';
 
 interface StepWelcomeProps {
@@ -59,7 +59,7 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
               transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
               className="absolute left-[8%] bottom-[18%] w-14 h-14 bg-gradient-to-tr from-[#F7931A] to-[#FFAB40] rounded-full shadow-lg shadow-[#F7931A]/30 border-2 border-white z-20 flex items-center justify-center text-white"
             >
-              <Bitcoin className="w-8 h-8 text-white" strokeWidth={2} />
+              <RealBitcoinIcon className="w-8 h-8 text-white" />
             </motion.div>
 
             {/* Floating Brain */}
@@ -68,7 +68,7 @@ export const StepWelcome = ({ onNext, onSkip }: StepWelcomeProps) => {
               transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
               className="absolute right-[5%] top-[12%] w-14 h-14 bg-gradient-to-tr from-[#8B5CF6] to-[#A78BFA] rounded-full shadow-lg shadow-[#8B5CF6]/30 border-2 border-white z-20 flex items-center justify-center text-white"
             >
-              <Brain className="w-8 h-8 text-white" strokeWidth={1.8} />
+              <RealBrainIcon className="w-8 h-8 text-white" />
             </motion.div>
 
             {/* Decorative symbols */}

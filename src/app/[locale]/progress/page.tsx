@@ -112,9 +112,6 @@ export default function ProgressPage() {
               <BarChart3 className="w-4 h-4 text-[#2563EB]" />
               Overall Quiz Performance
             </h3>
-            <span className="text-[10px] font-bold text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-              {stats.completedCount > 0 ? 'Active Learner' : 'New Learner'}
-            </span>
           </div>
 
           <div className="flex items-center gap-4">
@@ -165,7 +162,7 @@ export default function ProgressPage() {
                   Streak
                 </span>
                 <span className="text-xs font-black text-slate-900">
-                  {stats.streakDays} {stats.streakDays === 1 ? 'Day' : 'Days'} 🔥
+                  {stats.streakDays} {stats.streakDays === 1 ? 'Day' : 'Days'}
                 </span>
               </div>
               <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">

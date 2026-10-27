@@ -6,15 +6,14 @@ import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
 import { InterestChip } from '../InterestChip';
 import {
-  Brain,
   Link as LinkIcon,
-  Bitcoin,
   Network,
   BarChart3,
   Cpu,
   Briefcase,
   Lightbulb,
 } from 'lucide-react';
+import { RealBitcoinIcon, RealBrainIcon } from '@/components/ui/RealIcons';
 import { useTranslations } from 'next-intl';
 
 interface StepInterestsProps {
@@ -24,9 +23,9 @@ interface StepInterestsProps {
 }
 
 const INTEREST_OPTIONS = [
-  { id: 'ai', icon: <Brain className="w-8 h-8" strokeWidth={1.5} /> },
+  { id: 'ai', icon: <RealBrainIcon className="w-8 h-8" /> },
   { id: 'blockchain', icon: <LinkIcon className="w-8 h-8" strokeWidth={1.5} /> },
-  { id: 'crypto', icon: <Bitcoin className="w-8 h-8" strokeWidth={1.5} /> },
+  { id: 'crypto', icon: <RealBitcoinIcon className="w-8 h-8" /> },
   { id: 'ml', icon: <Network className="w-8 h-8" strokeWidth={1.5} /> },
   { id: 'finance', icon: <BarChart3 className="w-8 h-8" strokeWidth={1.5} /> },
   { id: 'tech', icon: <Cpu className="w-8 h-8" strokeWidth={1.5} /> },

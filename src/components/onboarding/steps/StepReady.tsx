@@ -4,7 +4,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { StepHeader } from '../StepHeader';
 import { PrimaryButton } from '../PrimaryButton';
-import { Trophy, ChevronRight, Brain, Bitcoin } from 'lucide-react';
+import { Trophy, ChevronRight } from 'lucide-react';
+import { RealBitcoinIcon, RealBrainIcon } from '@/components/ui/RealIcons';
 import { useTranslations } from 'next-intl';
 
 interface StepReadyProps {
@@ -84,7 +85,7 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
           <div className="space-y-3">
             <div className="flex items-center p-3 border border-[#F3F4F6] rounded-[16px] shadow-sm bg-white">
               <div className="w-10 h-10 rounded-[10px] bg-[#F5F3FF] flex items-center justify-center mr-3">
-                <Brain className="w-6 h-6 text-[#8B5CF6]" />
+                <RealBrainIcon className="w-6 h-6 text-[#8B5CF6]" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-[14px] text-[#111827]">{t('aiAwarenessQuiz')}</h4>
@@ -95,7 +96,7 @@ export const StepReady = ({ onNext }: StepReadyProps) => {
 
             <div className="flex items-center p-3 border border-[#F3F4F6] rounded-[16px] shadow-sm bg-white">
               <div className="w-10 h-10 rounded-[10px] bg-[#E0F2FE] flex items-center justify-center mr-3">
-                <Bitcoin className="w-6 h-6 text-[#3B82F6]" />
+                <RealBitcoinIcon className="w-6 h-6 text-[#3B82F6]" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-[14px] text-[#111827]">{t('cryptoFundamentals')}</h4>
